@@ -1,10 +1,10 @@
 #include "Flock.h"
 
-Flock::Flock(GLFWwindow* window, int width, int height)
-	:m_width{ width },
-	m_height{ height },
-	m_window{ window }
-{ }
+Flock::Flock(GLFWwindow* window)
+	:m_window{ window }
+{
+	glfwGetWindowSize(m_window, &m_width, &m_height);
+}
 
 Flock::~Flock()
 {
@@ -15,74 +15,23 @@ void Flock::init(int preyNum, int predNum)
 {
 	m_preyAmount = preyNum;
 	m_predAmount = predNum;
+	m_flock.clear();
 	m_flock.resize(m_predAmount + m_preyAmount);
 	m_data = new float[4 * (m_predAmount + m_preyAmount)];
+
 	for (int i{ 0 }; i < (m_predAmount + m_preyAmount); ++i)
 	{
 		if (i < m_preyAmount)
 		{
-			m_flock[i] = Boid{ glm::vec2(m_width / 2.0f, m_height / 2.0f), Boid::Type::prey, 4.0f };
+			m_flock[i] = Boid{ glm::vec2(m_width / 2.0f, m_height / 2.0f), 0.03f, 4.0f, 50.0f, 25.0f, 4.0f, Boid::Type::prey };
 		}
 		else
 		{
-			m_flock[i] = Boid{ glm::vec2(m_width / 2.0f, m_height / 2.0f), Boid::Type::predator, 8.0f };
+			m_flock[i] = Boid{ glm::vec2(m_width / 2.0f, m_height / 2.0f), 0.03f, 4.0f, 50.0f, 25.0f, 8.0f, Boid::Type::prey };
 		}
 	}
 
 	updateData();
-
-
-	ResourceManager::loadShader("boid.vert", "boid.frag", "wireBoid.geom", m_shaderName);
-
-	glGenBuffers(1, &m_VBO);
-
-	glGenVertexArrays(1, &m_VAO);
-	glBindVertexArray(m_VAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	glBufferData(GL_ARRAY_BUFFER, getByteSize(), m_data, GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(3 * sizeof(float)));
-
-	glBindVertexArray(0);
-	glBindBuffer(GL_VERTEX_ARRAY, 0);
-
-	float aspect{ m_width / static_cast<float>(m_height) };
-	glm::mat4 projection = glm::ortho(-aspect, aspect, -1.0f, 1.0f);
-	ResourceManager::getShader("boids").setMat4("proj", projection);
-}
-
-void Flock::processInput()
-{
-	if (glfwGetMouseButton(m_window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
-	{
-		double xPos, yPos;
-		glfwGetCursorPos(m_window, &xPos, &yPos);
-		m_lastMouse = glm::vec2{ static_cast<float>(xPos), static_cast<float>(m_height) - static_cast<float>(yPos) };
-		m_clicking = true;
-	}
-	else
-	{
-		m_clicking = false;
-	}
-
-	if (glfwGetKey(m_window, GLFW_KEY_1) == GLFW_PRESS)
-	{
-		m_currentMode = Behaviour::seek_and_flee;
-	}
-	else if (glfwGetKey(m_window, GLFW_KEY_2) == GLFW_PRESS)
-	{
-		m_currentMode = Behaviour::pursue_and_evade;
-	}
-	else if (glfwGetKey(m_window, GLFW_KEY_3) == GLFW_PRESS)
-	{
-		m_currentMode = Behaviour::flock;
-	}
 }
 
 void Flock::updateData()
@@ -97,60 +46,49 @@ void Flock::updateData()
 	}
 }
 
-void Flock::update()
+void Flock::seek(Boid& boid, float weight)
 {
-	if (std::chrono::duration<double>(std::chrono::high_resolution_clock::now() 
-		- m_lastFrame).count() >= m_frameRate)
+	double xPos, yPos;
+	glfwGetCursorPos(m_window, &xPos, &yPos);
+	glm::vec2 target{ static_cast<float>(xPos), m_height - static_cast<float>(yPos) };
+	glm::vec2 steering = target - boid.getPosition();
+	steering = glm::normalize(steering) * boid.getMaxVelocity();
+
+	steering -= boid.getVelocity();
+
+	boid.addAcceleration(weight * steering);
+}
+
+void Flock::border(Boid& boid)
+{
+	if (boid.getPosition().x < -boid.getSize())
 	{
-		if (m_clicking)
+		boid.setPosition(glm::vec2(static_cast<float>(m_width) + boid.getSize(), boid.getPosition().y));
+	}
+	if (boid.getPosition().x > static_cast<float>(m_width) + boid.getSize())
+	{
+		boid.setPosition(glm::vec2(-boid.getSize(), boid.getPosition().y));
+	}
+	if (boid.getPosition().y < -boid.getSize())
+	{
+		boid.setPosition(glm::vec2(boid.getPosition().x, static_cast<float>(m_height) + boid.getSize()));
+	}
+	if (boid.getPosition().y > static_cast<float>(m_height) + boid.getSize())
+	{
+		boid.setPosition(glm::vec2(boid.getPosition().x, -boid.getSize()));
+	}
+}
+
+bool Flock::update()
+{
+	if (std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - m_lastUpdate).count() >= m_updatePeriod)
+	{
+		if (m_currentMode == Behaviour::seek_and_flee)
 		{
 			for (auto& boid : m_flock)
 			{
-				if (boid.getType() == Boid::Type::prey)
-				{
-					boid.flee(m_lastMouse);
-				}
-				else
-				{
-					boid.seek(m_lastMouse);
-				}
-			}
-		}
-		else if (m_currentMode == Behaviour::seek_and_flee)
-		{
-			for (auto& boid : m_flock)
-			{
-				if (boid.getType() == Boid::Type::prey)
-				{
-					boid.flee( Boid::Type::predator);
-				}
-				else
-				{
-					boid.seek( Boid::Type::prey );
-				}
-			}
-		}
-		else if (m_currentMode == Behaviour::pursue_and_evade)
-		{
-			for (auto& boid : m_flock)
-			{
-				if (boid.getType() == Boid::Type::prey)
-				{
-					boid.evade(Boid::Type::predator);
-				}
-				else
-				{
-					boid.pursue(Boid::Type::prey);
-				}
-			}
-		}
-		else if (m_currentMode == Behaviour::flock)
-		{
-			for (auto& boid : m_flock)
-			{
-				boid.seperate(1.5f);
-				boid.align(1.0f);
-				boid.cohesion(1.0f);
+				seek(boid, 1.0f);
+				border(boid);
 			}
 		}
 		
@@ -160,18 +98,8 @@ void Flock::update()
 		}
 		updateData();
 
-		ResourceManager::getShader(m_shaderName).activate();
-		glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, getByteSize(), m_data);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		m_lastFrame = std::chrono::high_resolution_clock::now();
+		m_lastUpdate = std::chrono::high_resolution_clock::now();
+		return true;
 	}
-}
-
-void Flock::render()
-{
-	ResourceManager::getShader(m_shaderName).activate();
-	glBindVertexArray(m_VAO);
-	glDrawArrays(GL_POINTS, 0, (m_preyAmount + m_predAmount));
-	glBindVertexArray(0);
+	return false;
 }
