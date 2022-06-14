@@ -29,9 +29,6 @@ void Flock::init(int preyNum, int predNum)
 		}
 	}
 
-	Boid::setBorder(m_width, m_height);
-	Boid::setFlock(&m_flock);
-
 	updateData();
 
 

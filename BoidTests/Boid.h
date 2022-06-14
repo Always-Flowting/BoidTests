@@ -28,18 +28,19 @@ private:
 	glm::vec2 m_velocity{ 0.0f };
 	glm::vec2 m_acceleration{ 0.0f };
 
-	float m_maxSpeed{ 2.0f };
-	// maximum acceleration for turning
-	float m_maxForce{ 0.04f };
+	float m_maxAcceleration{ 0.03f };
+	float m_maxVelocity{ 4.0f };
 
 	Type m_type;
 
-	// will move the boid across borders
-	void borderLoop();
-
 public:
 	Boid();
-	Boid(const glm::vec2& position, Type type, float size);
+	Boid(const glm::vec2& position, Type type, float maxAccel, float maxVel);
+
+	void addAcceleration(const glm::vec2& acceleration) { m_acceleration += acceleration; }
+	void setAcceleration(const glm::vec2& acceleration) { m_acceleration = acceleration; }
+
+	void setPosition(const glm::vec2& position) { m_position = position; }
 
 	void update();
 
