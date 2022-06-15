@@ -3,6 +3,11 @@
 std::mt19937 Boid::m_rand{ static_cast<unsigned int>(std::chrono::steady_clock::now().time_since_epoch().count()) };
 std::uniform_real_distribution<float> Boid::randomAngle{ 0.0f, 6.283185f };
 
+std::map<Boid::Type, glm::vec3> Boid::m_colour{
+	{Boid::Type::prey, glm::vec3{0.23f, 0.79f, 0.42f}},
+	{Boid::Type::predator, glm::vec3{0.73f, 0.02f, 0.11f}}
+};
+
 // default constructor for a boid object
 Boid::Boid()
 	:m_position{ glm::vec2{0.0f, 0.0f} },

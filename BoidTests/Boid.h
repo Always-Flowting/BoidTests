@@ -6,6 +6,7 @@
 #include <random>
 #include <chrono>
 #include <iostream>
+#include <map>
 
 class Boid
 {
@@ -22,6 +23,8 @@ private:
 	// static random variables for initil angles
 	static std::mt19937 m_rand;
 	static std::uniform_real_distribution<float> randomAngle;
+
+	static std::map<Type, glm::vec3> m_colour;
 
 	// boid movement variables
 	glm::vec2 m_position;
@@ -59,6 +62,8 @@ public:
 	float getSeperationistance()	const { return m_seperationDistance; }
 	float getSize()					const { return m_size; }
 	Type getType()					const { return m_type; }
+
+	static const glm::vec3& getColour(Type type) { return m_colour[type]; }
 };
 
 #endif
