@@ -262,7 +262,26 @@ void Flock::cohesion(Boid& boid, float weight)
 	}
 }
 
+void Flock::eat(Boid& boid, float radius)
+{
+	if (boid.getType() == Boid::Type::predator)
+	{
+		static std::vector<int> toRemove{};
+		for (int i{ 0 }; i < m_preyAmount; ++i)
+		{
+			float dist{ glm::distance(boid.getPosition(), m_flock[i].getPosition())};
+			if (dist < radius)
+			{
+				toRemove.push_back(i);
+			}
+		}
 
+		if (toRemove.size() > 0)
+		{
+			removeResize(toRemove);
+		}
+	}
+}
 
 
 
@@ -285,6 +304,20 @@ void Flock::border(Boid& boid)
 	{
 		boid.setPosition(glm::vec2(boid.getPosition().x, -boid.getSize()));
 	}
+}
+
+void Flock::removeResize(std::vector<int>& toRemove)
+{
+	std::sort(toRemove.begin(), toRemove.end());
+	for (auto it{toRemove.rbegin()}; it != toRemove.rend(); ++it)
+	{
+		m_flock.erase(m_flock.begin() + *it);
+	}
+	m_preyAmount -= toRemove.size();
+	toRemove.clear();
+	delete[] m_data;
+	m_data = new float[7 * (m_preyAmount + m_predAmount)];
+	updateData();
 }
 
 void Flock::updateData()
@@ -328,13 +361,18 @@ void Flock::init(int preyNum, int predNum)
 	{
 		if (i < m_preyAmount)
 		{
-			m_flock[i] = Boid{ glm::vec2(m_width / 2.0f, m_height / 2.0f), 0.06f, 6.0f, 100.0f, 30.0f, 6.0f, Boid::Type::prey };
+			m_flock[i] = Boid{ glm::vec2(m_width / 2.0f, m_height / 2.0f), 0.06f, 6.0f, 100.0f, 45.0f, 6.0f, Boid::Type::prey };
 		}
 		else
 		{
-			m_flock[i] = Boid{ glm::vec2(m_width / 2.0f, m_height / 2.0f), 0.09f, 9.0f, 150.0f, 125.0f, 8.0f, Boid::Type::predator };
+			m_flock[i] = Boid{ glm::vec2(2.0f, 2.0f), 0.09f, 9.0f, 150.0f, 125.0f, 8.0f, Boid::Type::predator };
 		}
 	}
+
+	m_weights = {
+		{Boid::Type::prey, {1.5f, 1.0f, 1.0f}},
+		{Boid::Type::predator, {2.0f, 0.8f, 1.3f}}
+	};
 
 	updateData();
 }
@@ -379,6 +417,7 @@ bool Flock::run()
 			seperate(boid, m_weights[Boid::Type::predator][0]);
 			align(boid, m_weights[Boid::Type::predator][1]);
 			cohesion(boid, m_weights[Boid::Type::predator][2]);
+			eat(boid, 10.0f);
 			if (glfwGetMouseButton(m_window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 			{
 				switch (m_currentMode)

@@ -42,10 +42,7 @@ private:
 	
 	glm::vec2 m_mousePosition{ 0.0f };
 
-	std::map<Boid::Type, std::array<float, 3>> m_weights{
-		{Boid::Type::prey, {1.5f, 1.0f, 1.0f}},
-		{Boid::Type::predator, {2.0f, 0.8f, 1.3f}}
-	};
+	std::map<Boid::Type, std::array<float, 3>> m_weights{};
 
 	void updateData();
 
@@ -66,7 +63,11 @@ private:
 	void align(Boid& boid, float weight);
 	void cohesion(Boid& boid, float weight);
 
+	void eat(Boid& boid, float radius);
+
 	void border(Boid& boid);
+
+	void removeResize(std::vector<int>& toRemove);
 
 public:
 	Flock(GLFWwindow* window);

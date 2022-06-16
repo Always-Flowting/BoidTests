@@ -1,71 +1,51 @@
-﻿#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+﻿#include <exception>
+#include <stdexcept>
 
-#include "WorldDisplay.h"
+#include "Display.h"
 
-int wWidth{ 1600 };
-int wHeight{ 900 };
+Display* display{ nullptr };
 
-// take input while on the window and do something with it
-void processInput(GLFWwindow* window);
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
+void mouse_callback(GLFWwindow* window, int button, int action, int modifier);
 
 int main()
 {
-	// initilize and set up glfw
-	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-	// create the window object
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-	GLFWwindow* window{ glfwCreateWindow(wWidth, wHeight, "window", nullptr, nullptr) };
-
-	// error handling for if window can not set up correctly
-	if (!window)
+	try
 	{
-		std::cerr << "Failed to create GLFW window" << std::endl;
-		glfwTerminate();
-		return -1;
+		display = new Display{ 1600, 900, key_callback };
 	}
-	// make the window what glfw is outputtin to
-	glfwMakeContextCurrent(window);
-
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	catch (const std::exception& exception)
 	{
-		std::cerr << "Failed to initialize GLAD" << std::endl;
+		std::cerr << "ERROR::(" << exception.what() << ")\n";
 		return -1;
 	}
 
-	DisplayWorld disp{ window };
-	disp.init();
+	display->init();
 
-	while (!glfwWindowShouldClose(window))
+	glLineWidth(2.0f);
+
+	while (!display->shouldClose())
 	{
-		processInput(window);
+		display->clear(0.1f, 0.1f, 0.25f, 1.0f);
+		display->update();
 
-		disp.update();
-		
-		glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		display->draw();
 
-		disp.render();
-
-		// swap the buffers so we can draw to a hidden one
-		glfwSwapBuffers(window);
-		// make sure glfw knows to look for anything that​ happens
-		glfwPollEvents();
+		display->process(true, true);
 	}
 
-	glfwTerminate();
+	delete display;
 	return 0;
 }
 
-// take input while on the window and do something with it
-void processInput(GLFWwindow* window)
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 	{
-		glfwSetWindowShouldClose(window, true);
+		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
+}
+
+void mouse_callback(GLFWwindow* window, int button, int action, int modifier)
+{
 }

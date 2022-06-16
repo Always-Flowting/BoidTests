@@ -42,7 +42,7 @@
     <ClCompile Include="Flock.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WorldDisplay.cpp">
+    <ClCompile Include="Display.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -59,7 +59,10 @@
     <ClInclude Include="Flock.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="WorldDisplay.h">
+    <ClInclude Include="Display.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Menu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
