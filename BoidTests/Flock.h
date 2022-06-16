@@ -14,6 +14,18 @@
 
 class Flock
 {
+public:
+	struct BoidVariables
+	{
+		float seperation{};
+		float alignment{};
+		float cohesion{};
+		float maxAcceleration{};
+		float maxVelocity{};
+		float sightDistance{};
+		float seperationDistance{};
+	};
+
 private:
 	enum class MouseAction
 	{
@@ -42,7 +54,7 @@ private:
 	
 	glm::vec2 m_mousePosition{ 0.0f };
 
-	std::map<Boid::Type, std::array<float, 3>> m_weights{};
+	std::map<Boid::Type, BoidVariables> m_weights{};
 
 	void updateData();
 
@@ -80,6 +92,12 @@ public:
 	std::size_t getByteSize() const { return 7 * (m_preyAmount + m_predAmount) * sizeof(float); }
 	int getAmount() const { return (m_preyAmount + m_predAmount); }
 	float* getData() { return m_data; }
+
+	void setVariables(Boid::Type type, float seperation, float alignment, float cohesion, 
+		float maxAcceleration, float maxVelocity, float seperationDistance, float sightDistance)
+	{
+		m_weights[type] = { seperation, alignment, cohesion, maxAcceleration, maxVelocity, seperationDistance, sightDistance };
+	}
 };
 
 #endif

@@ -31,38 +31,30 @@ private:
 	glm::vec2 m_velocity{ 0.0f };
 	glm::vec2 m_acceleration{ 0.0f };
 
-	float m_maxAcceleration;
-	float m_maxVelocity;
-
-	float m_senseDistance;
-	float m_seperationDistance;
-
 	float m_size;
 
 	Type m_type;
 
 public:
 	Boid();
-	Boid(const glm::vec2& position, float maxAccel, float maxVel, float sense, float seperation, float size, Type type);
+	Boid(const glm::vec2& position, float size, Type type);
 
 	void addAcceleration(const glm::vec2& acceleration) { m_acceleration += acceleration; }
 	void setAcceleration(const glm::vec2& acceleration) { m_acceleration = acceleration; }
 
 	void setPosition(const glm::vec2& position) { m_position = position; }
 
+	void update(float maxAcceleration, float maxVelocity);
 	void update();
 
 	const glm::vec2& getPosition()		const { return m_position; }
 	const glm::vec2& getVelocity()		const { return m_velocity; }
 	const glm::vec2& getAcceleration()	const { return m_acceleration; }
 	float getAngle()				const { return glm::atan(m_velocity.y, m_velocity.x); }
-	float getMaxAcceleration()		const { return m_maxAcceleration; }
-	float getMaxVelocity()			const { return m_maxVelocity; }
-	float getSenseDistance()		const { return m_senseDistance; }
-	float getSeperationistance()	const { return m_seperationDistance; }
 	float getSize()					const { return m_size; }
 	Type getType()					const { return m_type; }
 
+	static void setColour(Type type, const glm::vec3& colour) { m_colour[type] = colour; }
 	static const glm::vec3& getColour(Type type) { return m_colour[type]; }
 };
 
