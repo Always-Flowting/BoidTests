@@ -43,9 +43,9 @@ void Display::init()
 {
 	m_flock = std::unique_ptr<Flock>{ new Flock{m_window} };
 	m_flock->init(250);
-	m_flock->setVariables(Boid::Type::prey, 1.0f, 0.66666f, 0.66666f, 0.06f, 6.0f, 100.0f, 45.0f);
+	m_flock->setVariables(Boid::Type::prey1, 1.0f, 0.66666f, 0.66666f);
 
-	ResourceManager::loadShader("boid.vert", "boid.frag", "boid.geom", m_flockShader);
+	ResourceManager::loadShader("boid.vert", "boid.frag", "wireBoid.geom", m_flockShader);
 
 	glGenBuffers(1, &m_VBO);
 

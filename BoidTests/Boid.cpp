@@ -4,15 +4,17 @@ std::mt19937 Boid::m_rand{ static_cast<unsigned int>(std::chrono::steady_clock::
 std::uniform_real_distribution<float> Boid::randomAngle{ 0.0f, 6.283185f };
 
 std::map<Boid::Type, glm::vec3> Boid::m_colour{
-	{Boid::Type::prey, glm::vec3{0.23f, 0.79f, 0.42f}},
-	{Boid::Type::predator, glm::vec3{0.73f, 0.02f, 0.11f}}
+	{Boid::Type::prey1, glm::vec3{0.23f, 0.79f, 0.42f}},
+	{Boid::Type::predator1, glm::vec3{0.73f, 0.02f, 0.11f}}
 };
+
+std::map<Boid::Type, Boid::TypeVars> Boid::m_typeVariables{};
 
 // default constructor for a boid object
 Boid::Boid()
 	:m_position{ glm::vec2{0.0f, 0.0f} },
 	m_size{ 0.0f },
-	m_type{ Type::prey }
+	m_type{ Type::prey1 }
 { }
 
 // constructor for a boid object will give the boid a random direction to face
@@ -26,26 +28,19 @@ Boid::Boid(const glm::vec2& position, float size, Type type)
 }
 
 // upate the boids velocity and position then reset the acceleration
-void Boid::update(float maxAcceleration, float maxVelocity)
-{
-	if (glm::length(m_acceleration) > maxAcceleration)
-	{
-		m_acceleration = glm::normalize(m_acceleration) * maxAcceleration;
-	}
-	m_velocity += m_acceleration;
-
-	if (glm::length(m_velocity) > maxVelocity)
-	{
-		m_velocity = glm::normalize(m_velocity) * maxVelocity;
-	}
-	m_position += m_velocity;
-
-	m_acceleration = glm::vec2{ 0.0f };
-}
-
 void Boid::update()
 {
+	if (glm::length(m_acceleration) > m_typeVariables[m_type].maxAcceleration)
+	{
+		m_acceleration = glm::normalize(m_acceleration) * m_typeVariables[m_type].maxAcceleration;
+	}
 	m_velocity += m_acceleration;
+
+	if (glm::length(m_velocity) > m_typeVariables[m_type].maxVelocity)
+	{
+		m_velocity = glm::normalize(m_velocity) * m_typeVariables[m_type].maxVelocity;
+	}
 	m_position += m_velocity;
+
 	m_acceleration = glm::vec2{ 0.0f };
 }

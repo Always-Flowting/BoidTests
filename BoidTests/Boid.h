@@ -7,16 +7,29 @@
 #include <chrono>
 #include <iostream>
 #include <map>
+#include <array>
 
 class Boid
 {
 public:
 	enum class Type
 	{
-		prey,
-		predator,
+		prey1,
+		prey2,
+		prey3,
+		predator1,
+		predator2,
+		predator3,
 
 		max_types
+	};
+
+	struct TypeVars
+	{
+		float maxAcceleration{};
+		float maxVelocity{};
+		float senseDistance{};
+		float seperationDistance{};
 	};
 
 private:
@@ -25,6 +38,7 @@ private:
 	static std::uniform_real_distribution<float> randomAngle;
 
 	static std::map<Type, glm::vec3> m_colour;
+	static std::map<Type, TypeVars> m_typeVariables;
 
 	// boid movement variables
 	glm::vec2 m_position;
@@ -44,7 +58,6 @@ public:
 
 	void setPosition(const glm::vec2& position) { m_position = position; }
 
-	void update(float maxAcceleration, float maxVelocity);
 	void update();
 
 	const glm::vec2& getPosition()		const { return m_position; }
@@ -53,6 +66,12 @@ public:
 	float getAngle()				const { return glm::atan(m_velocity.y, m_velocity.x); }
 	float getSize()					const { return m_size; }
 	Type getType()					const { return m_type; }
+
+	static const TypeVars& getVars(Type type) { return m_typeVariables[type]; }
+	static void setVars(Type type, float acceleration, float velocity, float sight, float seperation)
+	{
+		m_typeVariables[type] = std::move(TypeVars{ acceleration, velocity, sight, seperation });
+	}
 
 	static void setColour(Type type, const glm::vec3& colour) { m_colour[type] = colour; }
 	static const glm::vec3& getColour(Type type) { return m_colour[type]; }

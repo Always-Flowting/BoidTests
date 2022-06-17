@@ -20,10 +20,6 @@ public:
 		float seperation{};
 		float alignment{};
 		float cohesion{};
-		float maxAcceleration{};
-		float maxVelocity{};
-		float sightDistance{};
-		float seperationDistance{};
 	};
 
 private:
@@ -93,10 +89,9 @@ public:
 	int getAmount() const { return (m_preyAmount + m_predAmount); }
 	float* getData() { return m_data; }
 
-	void setVariables(Boid::Type type, float seperation, float alignment, float cohesion, 
-		float maxAcceleration, float maxVelocity, float seperationDistance, float sightDistance)
+	void setVariables(Boid::Type type, float seperation, float alignment, float cohesion)
 	{
-		m_weights[type] = { seperation, alignment, cohesion, maxAcceleration, maxVelocity, seperationDistance, sightDistance };
+		m_weights[type] = std::move(BoidVariables{ seperation, alignment, cohesion }) ;
 	}
 };
 
