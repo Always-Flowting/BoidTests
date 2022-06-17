@@ -11,6 +11,7 @@
 
 #include "ResourceManager.h"
 #include "Flock.h"
+#include "Menu.h"
 
 class Display
 {
@@ -24,6 +25,10 @@ private:
 	GLuint m_VAO{};
 	GLuint m_VBO{};
 	std::string m_flockShader{ "flock" };
+
+	GLuint s_VAO{};
+	GLuint s_VBO{};
+	std::string m_slidShader{ "slider" };
 
 	std::unique_ptr<Flock> m_flock{ nullptr };
 

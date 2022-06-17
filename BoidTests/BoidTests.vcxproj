@@ -154,6 +154,7 @@
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="ShaderClass.cpp" />
     <ClCompile Include="Display.cpp" />
+    <ClCompile Include="Slider.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Boid.h" />
@@ -162,11 +163,15 @@
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="ShaderClass.h" />
     <ClInclude Include="Display.h" />
+    <ClInclude Include="Slider.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="boid.frag" />
     <None Include="boid.geom" />
     <None Include="boid.vert" />
+    <None Include="Slider.frag" />
+    <None Include="Slider.geom" />
+    <None Include="Slider.vert" />
     <None Include="wireBoid.geom" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

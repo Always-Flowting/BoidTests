@@ -45,6 +45,9 @@
     <ClCompile Include="Display.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Slider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ShaderClass.h">
@@ -65,6 +68,9 @@
     <ClInclude Include="Menu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Slider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="boid.frag">
@@ -78,6 +84,15 @@
     </None>
     <None Include="wireBoid.geom">
       <Filter>Resource Files\geometryShaders</Filter>
+    </None>
+    <None Include="Slider.vert">
+      <Filter>Resource Files\vertexShaders</Filter>
+    </None>
+    <None Include="Slider.geom">
+      <Filter>Resource Files\geometryShaders</Filter>
+    </None>
+    <None Include="Slider.frag">
+      <Filter>Resource Files\fragmentShaders</Filter>
     </None>
   </ItemGroup>
 </Project>
