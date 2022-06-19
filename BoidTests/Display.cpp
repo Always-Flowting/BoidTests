@@ -45,7 +45,7 @@ Display::~Display()
 void Display::init()
 {
 	m_flock = std::unique_ptr<Flock>{ new Flock{m_window} };
-	m_flock->init(1, 0, 0, 0, 0, 0);
+	m_flock->init(30, 30, 30, 10, 10, 10);
 	m_flock->setVariables(Boid::Type::prey1, 1.0f, 0.66666f, 0.66666f);
 	m_flock->setVariables(Boid::Type::prey2, 1.0f, 0.66666f, 0.66666f);
 	m_flock->setVariables(Boid::Type::prey3, 1.0f, 0.66666f, 0.66666f);

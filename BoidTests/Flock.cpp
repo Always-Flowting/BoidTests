@@ -274,7 +274,7 @@ void Flock::evade(Boid& boid, float weight)
 
 	for (auto& other : m_flock)
 	{
-		if (other.getType() > Boid::Type::prey1)
+		if (other.getType() > Boid::Type::prey3)
 		{
 			float dist{ glm::distance(boid.getPosition(), other.getPosition()) };
 			if (dist < Boid::getVars(boid.getType()).senseDistance && dist > 0.0f && (dist < glm::length(fPrediction) || !found))
@@ -394,6 +394,7 @@ void Flock::init(int prey1Num, int prey2Num, int prey3Num, int pred1Num, int pre
 
 	int count{ 0 };
 	int set{ 0 };
+	std::cout << getAmount() << '\n';
 	for (int size : m_flockSize)
 	{
 		for (int i{ 0 }; i < size; ++i)
@@ -404,11 +405,11 @@ void Flock::init(int prey1Num, int prey2Num, int prey3Num, int pred1Num, int pre
 			}
 			else if (set == 1)
 			{
-				m_flock[i] = Boid{ glm::vec2(m_width / 2.0f, m_height / 2.0f), 3.0f, Boid::Type::prey2 };
+				m_flock[count] = Boid{ glm::vec2(m_width / 2.0f, m_height / 2.0f), 3.0f, Boid::Type::prey2 };
 			}
 			else if (set == 2)
 			{
-				m_flock[i] = Boid{ glm::vec2(m_width / 2.0f, m_height / 2.0f), 3.0f, Boid::Type::prey3 };
+				m_flock[count] = Boid{ glm::vec2(m_width / 2.0f, m_height / 2.0f), 3.0f, Boid::Type::prey3 };
 			}
 			else if (set == 3)
 			{
@@ -416,11 +417,11 @@ void Flock::init(int prey1Num, int prey2Num, int prey3Num, int pred1Num, int pre
 			}
 			else if (set == 4)
 			{
-				m_flock[i] = Boid{ glm::vec2(2.0f, 2.0f), 4.0f, Boid::Type::predator2 };
+				m_flock[count] = Boid{ glm::vec2(2.0f, 2.0f), 4.0f, Boid::Type::predator2 };
 			}
 			else
 			{
-				m_flock[i] = Boid{ glm::vec2(2.0f, 2.0f), 4.0f, Boid::Type::predator3 };
+				m_flock[count] = Boid{ glm::vec2(2.0f, 2.0f), 4.0f, Boid::Type::predator3 };
 			}
 			++count;
 		}
@@ -478,9 +479,12 @@ bool Flock::run()
 			cohesion(boid, m_weights[boid.getType()].cohesion);
 			if (boid.getType() == Boid::Type::prey1)
 			{
+			}
+			if (boid.getType() < Boid::Type::predator1)
+			{
 				evade(boid, 3.0f);
 			}
-			if (boid.getType() == Boid::Type::predator1)
+			if (boid.getType() > Boid::Type::prey3)
 			{
 				pursue(boid, 3.0f);
 			}
