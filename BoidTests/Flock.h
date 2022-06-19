@@ -8,6 +8,7 @@
 #include <chrono>
 #include <map>
 #include <array>
+#include <numeric>
 
 #include "Boid.h"
 #include "ResourceManager.h"
@@ -39,9 +40,7 @@ private:
 	GLFWwindow* m_window;
 	int m_width{};
 	int m_height{};
-
-	int m_preyAmount{};
-	int m_predAmount{};
+	std::vector<int> m_flockSize = std::vector<int>(6);
 
 	double m_updatePeriod{ 1.0 / 60.0 };
 	std::chrono::high_resolution_clock::time_point m_lastUpdate{ std::chrono::high_resolution_clock::now() };
@@ -66,6 +65,10 @@ private:
 
 	void arrive(Boid& boid, float weight, const glm::vec2& target);
 
+	void pursue(Boid& boid, float weight);
+
+	void evade(Boid& boid, float weight);
+
 
 	void seperate(Boid& boid, float weight);
 	void align(Boid& boid, float weight);
@@ -81,12 +84,12 @@ public:
 	Flock(GLFWwindow* window);
 	~Flock();
 
-	void init(int preyNum, int predNum = 0);
+	void init(int prey1Num, int prey2Num, int prey3Num, int pred1Num, int pred2Num, int Pred3Num);
 	void processInput();
 	bool run();
 
-	std::size_t getByteSize() const { return 7 * (m_preyAmount + m_predAmount) * sizeof(float); }
-	int getAmount() const { return (m_preyAmount + m_predAmount); }
+	std::size_t getByteSize() const { return 7 * (std::accumulate(m_flockSize.begin(), m_flockSize.end(), 0)) * sizeof(float); }
+	int getAmount() const { return std::accumulate(m_flockSize.begin(), m_flockSize.end(), 0); }
 	float* getData() { return m_data; }
 
 	void setVariables(Boid::Type type, float seperation, float alignment, float cohesion)

@@ -45,8 +45,13 @@ Display::~Display()
 void Display::init()
 {
 	m_flock = std::unique_ptr<Flock>{ new Flock{m_window} };
-	m_flock->init(250);
+	m_flock->init(1, 0, 0, 0, 0, 0);
 	m_flock->setVariables(Boid::Type::prey1, 1.0f, 0.66666f, 0.66666f);
+	m_flock->setVariables(Boid::Type::prey2, 1.0f, 0.66666f, 0.66666f);
+	m_flock->setVariables(Boid::Type::prey3, 1.0f, 0.66666f, 0.66666f);
+	m_flock->setVariables(Boid::Type::predator1, 2.0f, 0.5f, 1.5f);
+	m_flock->setVariables(Boid::Type::predator2, 2.0f, 0.5f, 1.5f);
+	m_flock->setVariables(Boid::Type::predator3, 2.0f, 0.5f, 1.5f);
 
 	ResourceManager::loadShader("boid.vert", "boid.frag", "wireBoid.geom", m_flockShader);
 
@@ -70,38 +75,10 @@ void Display::init()
 	glBindVertexArray(0);
 	glBindBuffer(GL_VERTEX_ARRAY, 0);
 
-	ResourceManager::loadShader("slider.vert", "slider.frag", "slider.geom", m_slidShader);
-
-	float slid[]{
-		0.0f,  0.0f, 1.75f, 0.02f, 1.5f,
-		0.0f, -0.25f, 1.75f, 0.02f, 1.0f,
-	};
-
-	glGenBuffers(1, &s_VBO);
-
-	glGenVertexArrays(1, &s_VAO);
-	glBindVertexArray(s_VAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, s_VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(slid), slid, GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(2 * sizeof(float)));
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(4 * sizeof(float)));
-
-	glBindVertexArray(0);
-	glBindBuffer(GL_VERTEX_ARRAY, 0);
-
 	float aspect{ m_width / static_cast<float>(m_height) };
 	glm::mat4 projection = glm::ortho(-aspect, aspect, -1.0f, 1.0f);
 
 	ResourceManager::getShader(m_flockShader).setMat4("proj", projection);
-	ResourceManager::getShader(m_slidShader).setMat4("proj", projection);
 }
 
 void Display::update()
@@ -110,13 +87,6 @@ void Display::update()
 	{
 		ResourceManager::getShader(m_flockShader).activate();
 		glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, m_flock->getByteSize(), m_flock->getData());
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	}
-	if (true)
-	{
-		ResourceManager::getShader(m_slidShader).activate();
-		glBindBuffer(GL_ARRAY_BUFFER, s_VBO);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, m_flock->getByteSize(), m_flock->getData());
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
@@ -133,11 +103,6 @@ void Display::draw()
 	ResourceManager::getShader(m_flockShader).activate();
 	glBindVertexArray(m_VAO);
 	glDrawArrays(GL_POINTS, 0, m_flock->getAmount());
-	glBindVertexArray(0);
-
-	ResourceManager::getShader(m_slidShader).activate();
-	glBindVertexArray(s_VAO);
-	glDrawArrays(GL_POINTS, 0, 5);
 	glBindVertexArray(0);
 }
 

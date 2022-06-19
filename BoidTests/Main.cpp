@@ -1,4 +1,7 @@
-﻿#include <exception>
+﻿#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
+#include <exception>
 #include <stdexcept>
 
 #include "Display.h"
@@ -12,7 +15,7 @@ int main()
 {
 	try
 	{
-		display = new Display{ 1600, 900, key_callback };
+		display = new Display{ 800, 450, key_callback };
 	}
 	catch (const std::exception& exception)
 	{

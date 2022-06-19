@@ -5,7 +5,11 @@ std::uniform_real_distribution<float> Boid::randomAngle{ 0.0f, 6.283185f };
 
 std::map<Boid::Type, glm::vec3> Boid::m_colour{
 	{Boid::Type::prey1, glm::vec3{0.23f, 0.79f, 0.42f}},
-	{Boid::Type::predator1, glm::vec3{0.73f, 0.02f, 0.11f}}
+	{Boid::Type::prey2, glm::vec3{0.09f, 0.79f, 0.51f}},
+	{Boid::Type::prey3, glm::vec3{0.91f, 0.8f, 0.32f}},
+	{Boid::Type::predator1, glm::vec3{0.73f, 0.02f, 0.11f}},
+	{Boid::Type::predator2, glm::vec3{0.61f, 0.09f, 0.36f}},
+	{Boid::Type::predator3, glm::vec3{0.08f, 0.06f, 0.25f}}
 };
 
 std::map<Boid::Type, Boid::TypeVars> Boid::m_typeVariables{};

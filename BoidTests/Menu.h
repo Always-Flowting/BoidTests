@@ -20,10 +20,18 @@ public:
 	};
 
 private:
-	std::map<Boid::Type, SliderGroup> m_weightSliders;
-	float* m_data;
+	static std::map<Boid::Type, SliderGroup> m_weightSliders;
+	static int m_numberOfGroups;
+	static float* m_data;
+
+	static void updateData();
 public:
-	void addSlider(const glm::vec2& position, float lenght, float height);
+
+	static void addSlider(Boid::Type type, const glm::vec2& position, float length, float height);
+	static const SliderGroup& getSliderGroup(Boid::Type type) { return m_weightSliders[type]; }
+
+	static float* getData() { return m_data; }
+	static std::size_t getSize() { return 15 * m_numberOfGroups; }
 };
 
 #endif

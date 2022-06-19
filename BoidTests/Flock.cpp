@@ -242,12 +242,62 @@ void Flock::cohesion(Boid& boid, float weight)
 	}
 }
 
+void Flock::pursue(Boid& boid, float weight)
+{
+	glm::vec2 fPrediction{ 0.0f };
+	bool found{ false };
+
+	for (auto& other : m_flock)
+	{
+		if (other.getType() < Boid::Type::predator1)
+		{
+			float dist{ glm::distance(boid.getPosition(), other.getPosition())};
+			if (dist < Boid::getVars(boid.getType()).senseDistance && dist > 0.0f && (dist < glm::length(fPrediction) || !found))
+			{
+				fPrediction = other.getPosition() + other.getVelocity() * dist * Boid::getVars(other.getType()).maxAcceleration;
+				found = true;
+			}
+		}
+
+	}
+
+	if (found)
+	{
+		seekPosition(boid, weight, fPrediction);
+	}
+}
+
+void Flock::evade(Boid& boid, float weight)
+{
+	glm::vec2 fPrediction{ 0.0f };
+	bool found{ false };
+
+	for (auto& other : m_flock)
+	{
+		if (other.getType() > Boid::Type::prey1)
+		{
+			float dist{ glm::distance(boid.getPosition(), other.getPosition()) };
+			if (dist < Boid::getVars(boid.getType()).senseDistance && dist > 0.0f && (dist < glm::length(fPrediction) || !found))
+			{
+				fPrediction = other.getPosition() + other.getVelocity() * dist * Boid::getVars(other.getType()).maxAcceleration;
+				found = true;
+			}
+		}
+
+	}
+
+	if (found)
+	{
+		fleePosition(boid, weight, fPrediction);
+	}
+}
+
 void Flock::eat(Boid& boid, float radius)
 {
 	if (boid.getType() == Boid::Type::predator1)
 	{
 		static std::vector<int> toRemove{};
-		for (int i{ 0 }; i < m_preyAmount; ++i)
+		for (int i{ 0 }; i < 10; ++i)
 		{
 			float dist{ glm::distance(boid.getPosition(), m_flock[i].getPosition())};
 			if (dist < radius)
@@ -293,17 +343,17 @@ void Flock::removeResize(std::vector<int>& toRemove)
 	{
 		m_flock.erase(m_flock.begin() + *it);
 	}
-	m_preyAmount -= toRemove.size();
+	//m_preyAmount -= toRemove.size();
 	toRemove.clear();
 	delete[] m_data;
-	m_data = new float[7 * (m_preyAmount + m_predAmount)];
+	m_data = new float[7 * getAmount()];
 	updateData();
 }
 
 void Flock::updateData()
 {
 	float aspect{ m_width / static_cast<float>(m_height) };
-	for (int i{ 0 }; i < (m_preyAmount + m_predAmount); ++i)
+	for (int i{ 0 }; i < getAmount(); ++i)
 	{
 		m_data[(7 * i)] = (2.0f * aspect * m_flock[i].getPosition().x / m_width) - aspect;
 		m_data[(7 * i) + 1] = (2.0f * m_flock[i].getPosition().y / m_height) - 1.0f;
@@ -329,26 +379,59 @@ Flock::~Flock()
 	delete[] m_data;
 }
 
-void Flock::init(int preyNum, int predNum)
+void Flock::init(int prey1Num, int prey2Num, int prey3Num, int pred1Num, int pred2Num, int pred3Num)
 {
-	m_preyAmount = preyNum;
-	m_predAmount = predNum;
-	m_flock.clear();
-	m_flock.resize(m_predAmount + m_preyAmount);
-	m_data = new float[7 * (m_predAmount + m_preyAmount)];
+	m_flockSize[static_cast<int>(Boid::Type::prey1)] = prey1Num;
+	m_flockSize[static_cast<int>(Boid::Type::prey2)] = prey2Num;
+	m_flockSize[static_cast<int>(Boid::Type::prey3)] = prey3Num;
+	m_flockSize[static_cast<int>(Boid::Type::predator1)] = pred1Num;
+	m_flockSize[static_cast<int>(Boid::Type::predator2)] = pred2Num;
+	m_flockSize[static_cast<int>(Boid::Type::predator3)] = pred3Num;
 
-	for (int i{ 0 }; i < (m_predAmount + m_preyAmount); ++i)
+	m_flock.clear();
+	m_flock.resize(getAmount());
+	m_data = new float[7 * getAmount()];
+
+	int count{ 0 };
+	int set{ 0 };
+	for (int size : m_flockSize)
 	{
-		if (i < m_preyAmount)
+		for (int i{ 0 }; i < size; ++i)
 		{
-			m_flock[i] = Boid{ glm::vec2(m_width / 2.0f, m_height / 2.0f), 6.0f, Boid::Type::prey1 };
+			if (set == 0)
+			{
+				m_flock[count] = Boid{ glm::vec2(m_width / 2.0f, m_height / 2.0f), 3.0f, Boid::Type::prey1 };
+			}
+			else if (set == 1)
+			{
+				m_flock[i] = Boid{ glm::vec2(m_width / 2.0f, m_height / 2.0f), 3.0f, Boid::Type::prey2 };
+			}
+			else if (set == 2)
+			{
+				m_flock[i] = Boid{ glm::vec2(m_width / 2.0f, m_height / 2.0f), 3.0f, Boid::Type::prey3 };
+			}
+			else if (set == 3)
+			{
+				m_flock[count] = Boid{ glm::vec2(2.0f, 2.0f), 4.0f, Boid::Type::predator1 };
+			}
+			else if (set == 4)
+			{
+				m_flock[i] = Boid{ glm::vec2(2.0f, 2.0f), 4.0f, Boid::Type::predator2 };
+			}
+			else
+			{
+				m_flock[i] = Boid{ glm::vec2(2.0f, 2.0f), 4.0f, Boid::Type::predator3 };
+			}
+			++count;
 		}
-		else
-		{
-			m_flock[i] = Boid{ glm::vec2(2.0f, 2.0f), 8.0f, Boid::Type::predator1 };
-		}
+		++set;
 	}
-	Boid::setVars(Boid::Type::prey1, 0.06f, 4.0f, 100.0f, 45.0f);
+	Boid::setVars(Boid::Type::prey1, 0.04f, 3.0f, 70.0f, 20.0f);
+	Boid::setVars(Boid::Type::prey2, 0.04f, 3.0f, 70.0f, 20.0f);
+	Boid::setVars(Boid::Type::prey3, 0.04f, 3.0f, 70.0f, 20.0f);
+	Boid::setVars(Boid::Type::predator1, 0.06f, 3.0f, 90.0f, 40.0f);
+	Boid::setVars(Boid::Type::predator2, 0.06f, 3.0f, 90.0f, 40.0f);
+	Boid::setVars(Boid::Type::predator3, 0.06f, 3.0f, 90.0f, 40.0f);
 
 	updateData();
 }
@@ -393,7 +476,14 @@ bool Flock::run()
 			seperate(boid, m_weights[boid.getType()].seperation);
 			align(boid, m_weights[boid.getType()].alignment);
 			cohesion(boid, m_weights[boid.getType()].cohesion);
-			//eat(boid, 10.0f);
+			if (boid.getType() == Boid::Type::prey1)
+			{
+				evade(boid, 3.0f);
+			}
+			if (boid.getType() == Boid::Type::predator1)
+			{
+				pursue(boid, 3.0f);
+			}
 			if (glfwGetMouseButton(m_window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 			{
 				switch (m_currentMode)
