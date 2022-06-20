@@ -36,22 +36,15 @@ Display::~Display()
 {
 	glDeleteVertexArrays(1, &m_VAO);
 	glDeleteBuffers(1, &m_VBO);
-
-	glDeleteVertexArrays(1, &s_VAO);
-	glDeleteBuffers(1, &s_VBO);
 	glfwTerminate();
 }
 
 void Display::init()
 {
-	m_flock = std::unique_ptr<Flock>{ new Flock{m_window} };
-	m_flock->init(30, 30, 30, 10, 10, 10);
-	m_flock->setVariables(Boid::Type::prey1, 1.0f, 0.66666f, 0.66666f);
-	m_flock->setVariables(Boid::Type::prey2, 1.0f, 0.66666f, 0.66666f);
-	m_flock->setVariables(Boid::Type::prey3, 1.0f, 0.66666f, 0.66666f);
-	m_flock->setVariables(Boid::Type::predator1, 2.0f, 0.5f, 1.5f);
-	m_flock->setVariables(Boid::Type::predator2, 2.0f, 0.5f, 1.5f);
-	m_flock->setVariables(Boid::Type::predator3, 2.0f, 0.5f, 1.5f);
+	m_flock = std::unique_ptr<Flock>{ new Flock{m_width, m_height} };
+	m_flock->addGroup(100, Boid::Type::prey, glm::vec3(0.02f, 0.87f, 0.34f), Boid::BoidVariables{ 0.06f, 4.0f, 25.0f, 40.0f, 3.0f, 1.0f, 0.667f, 0.667f });
+	m_flock->addGroup(10, Boid::Type::predator, glm::vec3(1.0f, 0.15f, 0.02f), Boid::BoidVariables{ 0.06f, 4.0f, 25.0f, 40.0f, 4.5f, 1.0f, 0.667f, 0.667f });
+	m_flock->resizeData();
 
 	ResourceManager::loadShader("boid.vert", "boid.frag", "wireBoid.geom", m_flockShader);
 

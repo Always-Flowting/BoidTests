@@ -22,14 +22,14 @@ public:
 
 	struct BoidVariables
 	{
-		float maxAcceleration;
-		float maxVelocity;
-		float seperationDistance;
-		float sightDistance;
-		float size;
-		float seperation;
-		float alignment;
-		float cohesion;
+		float maxAcceleration{};
+		float maxVelocity{};
+		float seperationDistance{};
+		float sightDistance{};
+		float size{};
+		float seperation{};
+		float alignment{};
+		float cohesion{};
 	};
 
 private:
@@ -37,8 +37,8 @@ private:
 	static std::mt19937 s_mt;
 	static std::uniform_real_distribution<float> s_rAngle;
 
-	static std::map<int, glm::vec3> s_groupColour;
 	static std::map<int, Type> s_groupType;
+	static std::map<int, glm::vec3> s_groupColour;
 	static std::map<int, BoidVariables> s_groupVariables;
 
 	// boid movement variables
@@ -68,9 +68,9 @@ public:
 
 	int getGroup() const { return m_group; }
 
-	static void setGroupColour(int group, const glm::vec3& colour) { s_groupColour[group] = colour; }
 	static void setGroupType(int group, Type type) { s_groupType[group] = type; }
-	static void setGroupVariables(int group, BoidVariables& variables) { s_groupVariables[group] = std::move(variables); }
+	static void setGroupColour(int group, const glm::vec3& colour) { s_groupColour[group] = colour; }
+	static void setGroupVariables(int group, const BoidVariables& variables) { s_groupVariables[group] = variables; }
 
 	const glm::vec3& getGroupColour() const { return s_groupColour[m_group]; }
 	Type getGroupType() const { return s_groupType[m_group]; }

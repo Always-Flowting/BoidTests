@@ -29,7 +29,7 @@ int main()
 
 	while (!display->shouldClose())
 	{
-		display->clear(0.1f, 0.1f, 0.25f, 1.0f);
+		display->clear(0.1f, 0.12f, 0.105f, 1.0f);
 
 		display->draw();
 

@@ -3,6 +3,10 @@
 std::mt19937 Boid::s_mt{ static_cast<unsigned int>(std::chrono::steady_clock::now().time_since_epoch().count()) };
 std::uniform_real_distribution<float> Boid::s_rAngle{ 0.0f, 6.283185f };
 
+std::map<int, Boid::Type> Boid::s_groupType;
+std::map<int, glm::vec3> Boid::s_groupColour;
+std::map<int, Boid::BoidVariables> Boid::s_groupVariables;
+
 // default constructor for a boid object
 Boid::Boid()
 	:m_position{ glm::vec2{ 0.0f } },
