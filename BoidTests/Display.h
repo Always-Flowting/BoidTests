@@ -31,17 +31,19 @@ private:
 
 	std::unique_ptr<Flock> m_flock{ nullptr };
 
+
+
+	void updateObjects();
+
 public:
 	Display(int width, int height, GLFWkeyfun keycallback = nullptr, GLFWmousebuttonfun mousecallback = nullptr);
 	~Display();
 
 	void init();
 
-	void update();
-
 	void clear(GLfloat r, GLfloat g, GLfloat b, GLfloat a);
 	void draw();
-	void process(bool draw, bool pollevents);
+	void update(bool draw, bool pollevents);
 
 	bool shouldClose() const { return m_isClosed; }
 };

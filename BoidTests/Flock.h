@@ -1,8 +1,6 @@
 #ifndef FLOCK_CLASS_H
 #define FLOCK_CLASS_H
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #include <vector>
 #include <string>
 #include <chrono>
@@ -15,87 +13,47 @@
 
 class Flock
 {
-public:
-	struct BoidVariables
-	{
-		float seperation{};
-		float alignment{};
-		float cohesion{};
-	};
-
 private:
-	enum class MouseAction
-	{
-		none,
-		all_seek,
-		all_flee,
-		seek_in_range,
-		flee_in_range,
-
-		max_behaviours
-	};
-
 	std::vector<Boid> m_flock{};
-	float* m_data{ nullptr };
-	GLFWwindow* m_window;
+	std::vector<int> m_groupSize{};
+
 	int m_width{};
 	int m_height{};
-	std::vector<int> m_flockSize = std::vector<int>(6);
 
-	double m_updatePeriod{ 1.0 / 60.0 };
 	std::chrono::high_resolution_clock::time_point m_lastUpdate{ std::chrono::high_resolution_clock::now() };
+	double m_updatePeriod{ 1.0 / 60.0 };
 
-	MouseAction m_currentMode{ MouseAction::all_seek };
-	
-	glm::vec2 m_mousePosition{ 0.0f };
+	float* m_data{ nullptr };
 
-	std::map<Boid::Type, BoidVariables> m_weights{};
 
 	void updateData();
 
+
 	void seekPosition	(Boid& boid, float weight, const glm::vec2& targetPosition);
-	void seekClosest	(Boid& boid, float weight);
-	void seekClosestType(Boid& boid, float weight, Boid::Type target);
-	void rangeSeek		(Boid& boid, float weight, const glm::vec2& targetPosition);
 
 	void fleePosition	(Boid& boid, float weight, const glm::vec2& targetPosition);
-	void fleeClosest	(Boid& boid, float weight);
-	void fleeClosestType(Boid& boid, float weight, Boid::Type target);
-	void rangeFlee		(Boid& boid, float weight, const glm::vec2& targetPosition);
 
-	void arrive(Boid& boid, float weight, const glm::vec2& target);
+	void pursueClosestType(Boid& boid, float weight, Boid::Type type);
 
-	void pursue(Boid& boid, float weight);
-
-	void evade(Boid& boid, float weight);
+	void evadeClosestType(Boid& boid, float weight, Boid::Type type);
 
 
-	void seperate(Boid& boid, float weight);
-	void align(Boid& boid, float weight);
-	void cohesion(Boid& boid, float weight);
-
-	void eat(Boid& boid, float radius);
+	void seperate(Boid& boid);
+	void align(Boid& boid);
+	void cohesion(Boid& boid);
 
 	void border(Boid& boid);
 
-	void removeResize(std::vector<int>& toRemove);
-
 public:
-	Flock(GLFWwindow* window);
+	Flock(int width, int height);
 	~Flock();
 
-	void init(int prey1Num, int prey2Num, int prey3Num, int pred1Num, int pred2Num, int Pred3Num);
-	void processInput();
+	void addGroup
 	bool run();
 
 	std::size_t getByteSize() const { return 7 * (std::accumulate(m_flockSize.begin(), m_flockSize.end(), 0)) * sizeof(float); }
 	int getAmount() const { return std::accumulate(m_flockSize.begin(), m_flockSize.end(), 0); }
 	float* getData() { return m_data; }
-
-	void setVariables(Boid::Type type, float seperation, float alignment, float cohesion)
-	{
-		m_weights[type] = std::move(BoidVariables{ seperation, alignment, cohesion }) ;
-	}
 };
 
 #endif

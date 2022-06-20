@@ -81,7 +81,7 @@ void Display::init()
 	ResourceManager::getShader(m_flockShader).setMat4("proj", projection);
 }
 
-void Display::update()
+void Display::updateObjects()
 {
 	if (m_flock->run())
 	{
@@ -106,7 +106,7 @@ void Display::draw()
 	glBindVertexArray(0);
 }
 
-void Display::process(bool draw, bool pollevents)
+void Display::update(bool draw, bool pollevents)
 {
 	//  Update Display
 	if (draw) {
@@ -122,4 +122,6 @@ void Display::process(bool draw, bool pollevents)
 	if (glfwWindowShouldClose(m_window)) {
 		m_isClosed = true;
 	}
+
+	updateObjects();
 }

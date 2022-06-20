@@ -15,7 +15,7 @@ int main()
 {
 	try
 	{
-		display = new Display{ 800, 450, key_callback };
+		display = new Display{ 800, 450, key_callback, mouse_callback };
 	}
 	catch (const std::exception& exception)
 	{
@@ -30,11 +30,10 @@ int main()
 	while (!display->shouldClose())
 	{
 		display->clear(0.1f, 0.1f, 0.25f, 1.0f);
-		display->update();
 
 		display->draw();
 
-		display->process(true, true);
+		display->update(true, true);
 	}
 
 	delete display;

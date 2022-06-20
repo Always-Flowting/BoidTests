@@ -8,253 +8,26 @@
 void Flock::seekPosition(Boid& boid, float weight, const glm::vec2& targetPosition)
 {
 	glm::vec2 steering = targetPosition - boid.getPosition();
-	steering = glm::normalize(steering) * Boid::getVars(boid.getType()).maxVelocity;
+	steering = glm::normalize(steering) * boid.getGroupVariables().maxVelocity;
 
 	steering -= boid.getVelocity();
 
 	boid.addAcceleration(weight * steering);
 }
 
-// seek the closest boid
-void Flock::seekClosest(Boid& boid, float weight)
-{
-	glm::vec2 target{ 0.0f };
-	bool found{ false };
-
-	for (auto& other : m_flock)
-	{
-		float dist{ glm::distance(boid.getPosition(), other.getPosition()) };
-		if (dist < Boid::getVars(boid.getType()).senseDistance && dist > 0.0f && (dist < glm::length(target) || !found))
-		{
-			target = other.getPosition();
-			found = true;
-		}
-	}
-
-	if (found)
-	{
-		seekPosition(boid, weight, target);
-	}
-}
-
-// seek the closest speficied type of boid
-void Flock::seekClosestType(Boid& boid, float weight, Boid::Type type)
-{
-	glm::vec2 target{ 0.0f };
-	bool found{ false };
-
-	for (auto& other : m_flock)
-	{
-		if (other.getType() == type)
-		{
-			float dist{ glm::distance(boid.getPosition(), other.getPosition())};
-			if (dist < Boid::getVars(boid.getType()).senseDistance && dist > 0.0f && (dist < glm::length(target) || !found))
-			{
-				target = other.getPosition();
-				found = true;
-			}
-		}
-	}
-
-	if (found)
-	{
-		seekPosition(boid, weight, target);
-	}
-}
-
-// seek if psoition specified is in range
-void Flock::rangeSeek(Boid& boid, float weight, const glm::vec2& targetPosition)
-{
-	float dist{ glm::distance(boid.getPosition(), targetPosition) };
-	if (dist <= Boid::getVars(boid.getType()).senseDistance)
-	{
-		seekPosition(boid, weight, targetPosition);
-	}
-}
-
-/*
-/ All fleeing based functions
-*/
-
-// flee from a set position
-void Flock::fleePosition(Boid& boid, float weight, const glm::vec2& targetPosition)
-{
-	glm::vec2 steering = boid.getPosition() - targetPosition;
-	steering = glm::normalize(steering) * Boid::getVars(boid.getType()).maxVelocity;
-
-	steering -= boid.getVelocity();
-
-	boid.addAcceleration(weight * steering);
-}
-
-// flee from closest boid
-void Flock::fleeClosest(Boid& boid, float weight)
-{
-	glm::vec2 target{ 0.0f };
-	bool found{ false };
-
-	for (auto& other : m_flock)
-	{
-		float dist{ glm::distance(boid.getPosition(), other.getPosition()) };
-		if (Boid::getVars(boid.getType()).senseDistance && dist > 0.0f && (dist < glm::length(target) || !found))
-		{
-			target = other.getPosition();
-			found = true;
-		}
-	}
-
-	if (found)
-	{
-		fleePosition(boid, weight, target);
-	}
-}
-
-// flee from closest type of boid
-void Flock::fleeClosestType(Boid& boid, float weight, Boid::Type type)
-{
-	glm::vec2 target{ 0.0f };
-	bool found{ false };
-
-	for (auto& other : m_flock)
-	{
-		if (other.getType() == type)
-		{
-			float dist{ glm::distance(boid.getPosition(), other.getPosition()) };
-			if (dist < Boid::getVars(boid.getType()).senseDistance && dist > 0.0f && (dist < glm::length(target) || !found))
-			{
-				target = other.getPosition();
-				found = true;
-			}
-		}
-	}
-
-	if (found)
-	{
-		fleePosition(boid, weight, target);
-	}
-}
-
-// flee if position specified is in range
-void Flock::rangeFlee(Boid& boid, float weight, const glm::vec2& targetPosition)
-{
-	float dist{ glm::distance(boid.getPosition(), targetPosition) };
-	if (dist <= Boid::getVars(boid.getType()).senseDistance)
-	{
-		fleePosition(boid, weight, targetPosition);
-	}
-}
-
-
-
-void Flock::arrive(Boid& boid, float weight, const glm::vec2& target)
-{
-	glm::vec2 offset{ target - boid.getPosition() };
-	float dist{ glm::length(offset) };
-	if (dist > 0.0f)
-	{
-		float ramped_speed{ Boid::getVars(boid.getType()).maxVelocity * dist / 500.0f};
-		float clipped{ std::min(Boid::getVars(boid.getType()).maxVelocity, ramped_speed) };
-		glm::vec2 steering{ (clipped / dist) * offset };
-		steering = steering - boid.getVelocity();
-
-		boid.addAcceleration(steering);
-	}
-
-}
-
-void Flock::seperate(Boid& boid, float weight)
-{
-	glm::vec2 steering{ 0.0f };
-	bool found{ false };
-
-	for (auto& other : m_flock)
-	{
-		if (boid.getType() == other.getType())
-		{
-
-			float dist{ glm::distance(boid.getPosition(), other.getPosition()) };
-			if (dist > 0.0f && dist <= Boid::getVars(boid.getType()).seperationDistance)
-			{
-				steering += glm::normalize(boid.getPosition() - other.getPosition()) / dist;
-				found = true;
-			}
-		}
-	}
-
-	if (found)
-	{
-		steering = glm::normalize(steering) * Boid::getVars(boid.getType()).maxVelocity;
-		steering -= boid.getVelocity();
-
-		boid.addAcceleration(weight * steering);
-	}
-}
-
-void Flock::align(Boid& boid, float weight)
-{
-	glm::vec2 direction{ 0.0f };
-	bool found{ false };
-
-	for (auto& other : m_flock)
-	{
-		if (boid.getType() == other.getType())
-		{
-			float dist{ glm::distance(boid.getPosition(), other.getPosition()) };
-			if (dist > 0.0f && dist <= Boid::getVars(boid.getType()).senseDistance)
-			{
-				direction += other.getVelocity();
-				found = true;
-			}
-		}
-	}
-
-	if (found)
-	{
-		direction = glm::normalize(direction) * Boid::getVars(boid.getType()).maxVelocity;
-		direction -= boid.getVelocity();
-
-		boid.addAcceleration(weight * direction);
-	}
-}
-
-void Flock::cohesion(Boid& boid, float weight)
-{
-	glm::vec2 target{ 0.0f };
-	int count{ 0 };
-
-	for (auto& other : m_flock)
-	{
-		if (boid.getType() == other.getType())
-		{
-			float dist{ glm::distance(boid.getPosition(), other.getPosition()) };
-			if (dist > 0.0f && dist <= Boid::getVars(boid.getType()).senseDistance)
-			{
-				target += other.getPosition();
-				++count;
-			}
-		}
-	}
-
-	if (count > 0)
-	{
-		target /= static_cast<float>(count);
-		seekPosition(boid, weight, target);
-	}
-}
-
-void Flock::pursue(Boid& boid, float weight)
+void Flock::pursueClosestType(Boid& boid, float weight, Boid::Type type)
 {
 	glm::vec2 fPrediction{ 0.0f };
 	bool found{ false };
 
 	for (auto& other : m_flock)
 	{
-		if (other.getType() < Boid::Type::predator1)
+		if (other.getGroupType() == type)
 		{
-			float dist{ glm::distance(boid.getPosition(), other.getPosition())};
-			if (dist < Boid::getVars(boid.getType()).senseDistance && dist > 0.0f && (dist < glm::length(fPrediction) || !found))
+			float dist{ glm::distance(boid.getPosition(), other.getPosition()) };
+			if (dist < boid.getGroupVariables().sightDistance && dist > 0.0f && (dist < glm::length(fPrediction) || !found))
 			{
-				fPrediction = other.getPosition() + other.getVelocity() * dist * Boid::getVars(other.getType()).maxAcceleration;
+				fPrediction = other.getPosition() + other.getVelocity() * dist * other.getGroupVariables().maxAcceleration;
 				found = true;
 			}
 		}
@@ -267,19 +40,34 @@ void Flock::pursue(Boid& boid, float weight)
 	}
 }
 
-void Flock::evade(Boid& boid, float weight)
+/*
+/ All fleeing based functions
+*/
+
+// flee from a set position
+void Flock::fleePosition(Boid& boid, float weight, const glm::vec2& targetPosition)
+{
+	glm::vec2 steering = boid.getPosition() - targetPosition;
+	steering = glm::normalize(steering) * boid.getGroupVariables().maxVelocity;
+
+	steering -= boid.getVelocity();
+
+	boid.addAcceleration(weight * steering);
+}
+
+void Flock::evadeClosestType(Boid& boid, float weight, Boid::Type type)
 {
 	glm::vec2 fPrediction{ 0.0f };
 	bool found{ false };
 
 	for (auto& other : m_flock)
 	{
-		if (other.getType() > Boid::Type::prey3)
+		if (other.getGroupType() == type)
 		{
 			float dist{ glm::distance(boid.getPosition(), other.getPosition()) };
-			if (dist < Boid::getVars(boid.getType()).senseDistance && dist > 0.0f && (dist < glm::length(fPrediction) || !found))
+			if (dist < boid.getGroupVariables().sightDistance && dist > 0.0f && (dist < glm::length(fPrediction) || !found))
 			{
-				fPrediction = other.getPosition() + other.getVelocity() * dist * Boid::getVars(other.getType()).maxAcceleration;
+				fPrediction = other.getPosition() + other.getVelocity() * dist * other.getGroupVariables().maxAcceleration;
 				found = true;
 			}
 		}
@@ -288,31 +76,93 @@ void Flock::evade(Boid& boid, float weight)
 
 	if (found)
 	{
-		fleePosition(boid, weight, fPrediction);
+		seekPosition(boid, weight, fPrediction);
 	}
 }
 
-void Flock::eat(Boid& boid, float radius)
+/*
+/ flocking behaviour implimentation
+*/
+
+// adds a force to the boid to seperate it a set distance from boids of the same type
+void Flock::seperate(Boid& boid)
 {
-	if (boid.getType() == Boid::Type::predator1)
+	glm::vec2 steering{ 0.0f };
+	bool found{ false };
+
+	for (auto& other : m_flock)
 	{
-		static std::vector<int> toRemove{};
-		for (int i{ 0 }; i < 10; ++i)
+		if (boid.getGroup() == other.getGroup())
 		{
-			float dist{ glm::distance(boid.getPosition(), m_flock[i].getPosition())};
-			if (dist < radius)
+			float dist{ glm::distance(boid.getPosition(), other.getPosition()) };
+			if (dist > 0.0f && dist <= boid.getGroupVariables().seperationDistance)
 			{
-				toRemove.push_back(i);
+				steering += glm::normalize(boid.getPosition() - other.getPosition()) / dist;
+				found = true;
 			}
 		}
+	}
 
-		if (toRemove.size() > 0)
-		{
-			removeResize(toRemove);
-		}
+	if (found)
+	{
+		steering = glm::normalize(steering) * boid.getGroupVariables().maxVelocity;
+		steering -= boid.getVelocity();
+
+		boid.addAcceleration(boid.getGroupVariables().seperation * steering);
 	}
 }
 
+void Flock::align(Boid& boid)
+{
+	glm::vec2 direction{ 0.0f };
+	bool found{ false };
+
+	for (auto& other : m_flock)
+	{
+		if (boid.getGroup() == other.getGroup())
+		{
+			float dist{ glm::distance(boid.getPosition(), other.getPosition()) };
+			if (dist > 0.0f && dist <= boid.getGroupVariables().sightDistance)
+			{
+				direction += other.getVelocity();
+				found = true;
+			}
+		}
+	}
+
+	if (found)
+	{
+		direction = glm::normalize(direction) * boid.getGroupVariables().maxVelocity;
+		direction -= boid.getVelocity();
+
+		boid.addAcceleration(boid.getGroupVariables().alignment * direction);
+	}
+}
+
+void Flock::cohesion(Boid& boid)
+{
+	glm::vec2 target{ 0.0f };
+	int count{ 0 };
+
+	for (auto& other : m_flock)
+	{
+		if (boid.getGroup() == other.getGroup())
+		{
+			float dist{ glm::distance(boid.getPosition(), other.getPosition()) };
+			if (dist > 0.0f && dist <= boid.getGroupVariables().sightDistance)
+			{
+				target += other.getPosition();
+				++count;
+			}
+		}
+	}
+
+	if (count > 0)
+	{
+		target /= static_cast<float>(count);
+		seekPosition(boid, boid.getGroupVariables().cohesion, target);
+	}
+}
 
 
 
@@ -334,20 +184,6 @@ void Flock::border(Boid& boid)
 	{
 		boid.setPosition(glm::vec2(boid.getPosition().x, -boid.getSize()));
 	}
-}
-
-void Flock::removeResize(std::vector<int>& toRemove)
-{
-	std::sort(toRemove.begin(), toRemove.end());
-	for (auto it{toRemove.rbegin()}; it != toRemove.rend(); ++it)
-	{
-		m_flock.erase(m_flock.begin() + *it);
-	}
-	//m_preyAmount -= toRemove.size();
-	toRemove.clear();
-	delete[] m_data;
-	m_data = new float[7 * getAmount()];
-	updateData();
 }
 
 void Flock::updateData()
@@ -394,7 +230,6 @@ void Flock::init(int prey1Num, int prey2Num, int prey3Num, int pred1Num, int pre
 
 	int count{ 0 };
 	int set{ 0 };
-	std::cout << getAmount() << '\n';
 	for (int size : m_flockSize)
 	{
 		for (int i{ 0 }; i < size; ++i)
@@ -482,11 +317,11 @@ bool Flock::run()
 			}
 			if (boid.getType() < Boid::Type::predator1)
 			{
-				evade(boid, 3.0f);
+				evadeClosestType(boid, 3.0f);
 			}
 			if (boid.getType() > Boid::Type::prey3)
 			{
-				pursue(boid, 3.0f);
+				pursueClosestType(boid, 3.0f);
 			}
 			if (glfwGetMouseButton(m_window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 			{
