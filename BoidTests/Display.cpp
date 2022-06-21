@@ -76,12 +76,15 @@ void Display::init()
 
 void Display::updateObjects()
 {
-	if (m_flock->run())
+	if (m_flockState <= objectState::frozen)
 	{
-		ResourceManager::getShader(m_flockShader).activate();
-		glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, m_flock->getByteSize(), m_flock->getData());
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		if (m_flock->run())
+		{
+			ResourceManager::getShader(m_flockShader).activate();
+			glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+			glBufferSubData(GL_ARRAY_BUFFER, 0, m_flock->getByteSize(), m_flock->getData());
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+		}
 	}
 }
 
@@ -93,10 +96,13 @@ void Display::clear(GLfloat r, GLfloat g, GLfloat b, GLfloat a)
 
 void Display::draw()
 {
-	ResourceManager::getShader(m_flockShader).activate();
-	glBindVertexArray(m_VAO);
-	glDrawArrays(GL_POINTS, 0, m_flock->getAmount());
-	glBindVertexArray(0);
+	if (m_flockState >= objectState::frozen)
+	{
+		ResourceManager::getShader(m_flockShader).activate();
+		glBindVertexArray(m_VAO);
+		glDrawArrays(GL_POINTS, 0, m_flock->getAmount());
+		glBindVertexArray(0);
+	}
 }
 
 void Display::update(bool draw, bool pollevents)
@@ -117,4 +123,28 @@ void Display::update(bool draw, bool pollevents)
 	}
 
 	updateObjects();
+}
+
+void Display::processKeyInput(int key, int scancode, int action, int mode)
+{
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+	{
+		glfwSetWindowShouldClose(m_window, GLFW_TRUE);
+	}
+
+	if (key == GLFW_KEY_F && action == GLFW_PRESS)
+	{
+		if (m_flockState == objectState::frozen)
+		{
+			m_flockState = objectState::normal;
+		}
+		else
+		{
+			m_flockState = objectState::frozen;
+		}
+	}
+}
+
+void Display::processMouseInput(int button, int action, int modifier)
+{
 }

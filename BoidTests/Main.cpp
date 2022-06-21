@@ -42,12 +42,10 @@ int main()
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-	{
-		glfwSetWindowShouldClose(window, GL_TRUE);
-	}
+	display->processKeyInput(key, scancode, action, mode);
 }
 
 void mouse_callback(GLFWwindow* window, int button, int action, int modifier)
 {
+	display->processMouseInput(button, action, modifier);
 }

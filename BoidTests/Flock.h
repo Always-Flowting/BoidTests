@@ -2,11 +2,9 @@
 #define FLOCK_CLASS_H
 
 #include <vector>
-#include <string>
 #include <chrono>
-#include <map>
-#include <array>
 #include <numeric>
+#include <iostream>
 
 #include "Boid.h"
 #include "ResourceManager.h"

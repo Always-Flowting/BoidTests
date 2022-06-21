@@ -5,9 +5,7 @@
 #include <vector>
 #include <random>
 #include <chrono>
-#include <iostream>
 #include <map>
-#include <array>
 
 class Boid
 {
