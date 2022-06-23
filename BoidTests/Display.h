@@ -48,6 +48,7 @@ public:
 	~Display();
 
 	void init();
+	void addFlockGroup(int amount, Boid::Type type, const glm::vec3& colour, const Boid::BoidVariables& variables);
 
 	void clear(GLfloat r, GLfloat g, GLfloat b, GLfloat a);
 	void draw();

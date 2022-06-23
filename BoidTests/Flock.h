@@ -4,7 +4,6 @@
 #include <vector>
 #include <chrono>
 #include <numeric>
-#include <iostream>
 
 #include "Boid.h"
 #include "ResourceManager.h"
@@ -26,7 +25,7 @@ private:
 	float m_aspect{};
 
 	std::chrono::high_resolution_clock::time_point m_lastUpdate{ std::chrono::high_resolution_clock::now() };
-	double m_updatePeriod{ 1.0 / 60.0 };
+	double m_updatePeriod{ 1.0 / 120.0 };
 
 	float* m_data{ nullptr };
 

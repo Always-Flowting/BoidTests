@@ -257,7 +257,7 @@ bool Flock::run()
 
 			if (boid.getGroupType() == Boid::Type::prey)
 			{
-				evadeClosestType(boid, 2.5f, Boid::Type::predator);
+				evadeClosestType(boid, 5.5f, Boid::Type::predator);
 			}
 			else if (boid.getGroupType() == Boid::Type::predator)
 			{

@@ -42,9 +42,6 @@ Display::~Display()
 void Display::init()
 {
 	m_flock = std::unique_ptr<Flock>{ new Flock{m_width, m_height} };
-	m_flock->addGroup(100, Boid::Type::prey, glm::vec3(0.02f, 0.87f, 0.34f), Boid::BoidVariables{ 0.06f, 4.0f, 25.0f, 40.0f, 3.0f, 1.0f, 0.667f, 0.667f });
-	m_flock->addGroup(10, Boid::Type::predator, glm::vec3(1.0f, 0.15f, 0.02f), Boid::BoidVariables{ 0.06f, 4.0f, 25.0f, 40.0f, 4.5f, 1.0f, 0.667f, 0.667f });
-	m_flock->resizeData();
 
 	ResourceManager::loadShader("boid.vert", "boid.frag", "wireBoid.geom", m_flockShader);
 
@@ -54,7 +51,7 @@ void Display::init()
 	glBindVertexArray(m_VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	glBufferData(GL_ARRAY_BUFFER, m_flock->getByteSize(), m_flock->getData(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, m_flock->getByteSize(), m_flock->getData(), GL_DYNAMIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0);
@@ -74,9 +71,19 @@ void Display::init()
 	ResourceManager::getShader(m_flockShader).setMat4("proj", projection);
 }
 
+void Display::addFlockGroup(int amount, Boid::Type type, const glm::vec3& colour, const Boid::BoidVariables& variables)
+{
+	m_flock->addGroup(amount, type, colour, variables);
+	m_flock->resizeData();
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+	glBufferData(GL_ARRAY_BUFFER, m_flock->getByteSize(), m_flock->getData(), GL_DYNAMIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
 void Display::updateObjects()
 {
-	if (m_flockState <= objectState::frozen)
+	if (m_flockState == objectState::normal)
 	{
 		if (m_flock->run())
 		{
@@ -98,6 +105,7 @@ void Display::draw()
 {
 	if (m_flockState >= objectState::frozen)
 	{
+		glLineWidth(2.0f);
 		ResourceManager::getShader(m_flockShader).activate();
 		glBindVertexArray(m_VAO);
 		glDrawArrays(GL_POINTS, 0, m_flock->getAmount());
