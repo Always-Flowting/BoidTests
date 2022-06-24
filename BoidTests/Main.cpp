@@ -32,7 +32,7 @@ int main()
 	//	Boid::BoidVariables{ 0.03f, 2.0f, 15.0f, 100.0f, 2.0f, 10.6f, 04.3f, 10.5f });
 
 	pDisplay->addFlockGroup(10, Boid::Type::predator, glm::vec3(1.0f, 0.15f, 0.02f), 
-		Boid::BoidVariables{ 0.06f, 4.0f, 55.0f, 120.0f, 4.5f, 1.5f, 0.667f, 0.667f });
+		Boid::BoidVariables{ 0.06f, 2.0f, 55.0f, 120.0f, 4.5f, 1.5f, 0.667f, 0.667f });
 
 	while (!pDisplay->shouldClose())
 	{

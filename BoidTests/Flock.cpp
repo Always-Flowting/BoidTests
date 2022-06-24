@@ -202,6 +202,13 @@ void Flock::updateData()
 		m_data[(dataSize * i) + 5]	= m_flock[i].getGroupColour().g;
 		m_data[(dataSize * i) + 6]	= m_flock[i].getGroupColour().b;
 	}
+
+
+
+	ResourceManager::getShader(m_shaderName).activate();
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, getByteSize(), m_data);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 
@@ -211,13 +218,42 @@ Flock::Flock(int width, int height)
 	:m_width{ width },
 	m_height{ height }
 {
+	ResourceManager::loadShader("boid.vert", "boid.frag", "wireBoid.geom", m_shaderName);
+
 	m_aspect = m_width / static_cast<float>(m_height);
+
+	glm::mat4 projection = glm::ortho(-m_aspect, m_aspect, -1.0f, 1.0f);
+
+	ResourceManager::getShader(m_shaderName).setMat4("proj", projection);
+
 	s_rX = std::uniform_real_distribution<float>{ 0.0f, static_cast<float>(m_width) };
 	s_rY = std::uniform_real_distribution<float>{ 0.0f, static_cast<float>(m_height) };
+
+	glGenBuffers(1, &m_VBO);
+
+	glGenVertexArrays(1, &m_VAO);
+	glBindVertexArray(m_VAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+	glBufferData(GL_ARRAY_BUFFER, getByteSize(), m_data, GL_DYNAMIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(2 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(4 * sizeof(float)));
+
+	glBindVertexArray(0);
+	glBindBuffer(GL_VERTEX_ARRAY, 0);
 }
 
 Flock::~Flock()
 {
+	glDeleteVertexArrays(1, &m_VAO);
+	glDeleteBuffers(GL_VERTEX_ARRAY, &m_VBO);
 	delete[] m_data;
 }
 
@@ -235,6 +271,13 @@ void Flock::addGroup(int amount, Boid::Type type, const glm::vec3& colour, const
 	{
 		m_flock.push_back(std::move(Boid(glm::vec2{s_rX(s_mt), s_rY(s_mt)}, group)));
 	}
+
+	resizeData();
+	updateData();
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+	glBufferData(GL_ARRAY_BUFFER, getByteSize(), m_data, GL_DYNAMIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	++group;
 }
@@ -278,4 +321,13 @@ bool Flock::run()
 		return true;
 	}
 	return false;
+}
+
+void Flock::render()
+{
+	glLineWidth(2.0f);
+	ResourceManager::getShader(m_shaderName).activate();
+	glBindVertexArray(m_VAO);
+	glDrawArrays(GL_POINTS, 0, getAmount());
+	glBindVertexArray(0);
 }

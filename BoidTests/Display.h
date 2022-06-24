@@ -12,6 +12,7 @@
 
 #include "ResourceManager.h"
 #include "Flock.h"
+#include "Slider.h"
 
 class Display
 {
@@ -31,17 +32,17 @@ private:
 
 	bool m_isClosed{ false };
 
-	GLuint m_VAO{};
-	GLuint m_VBO{};
-	std::string m_flockShader{ "flock" };
-
 	objectState m_flockState{ objectState::normal };
 
 	std::unique_ptr<Flock> m_flock{ nullptr };
 
+	Slider m_slider{ glm::vec2{600.0f, 337.5f}, 1000.0f, 500.0f };
+
+
 
 
 	void updateObjects();
+
 
 public:
 	Display(int width, int height, GLFWkeyfun keycallback = nullptr, GLFWmousebuttonfun mousecallback = nullptr);

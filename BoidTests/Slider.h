@@ -3,6 +3,8 @@
 
 #include <glm/glm.hpp>
 
+#include <iostream>
+
 class Slider
 {
 private:
@@ -14,6 +16,10 @@ private:
 
 public:
 	Slider(const glm::vec2& position, float length, float height);
+
+	void updatePosition(float sliderPosition);
+
+	bool mouseOver(glm::vec2 mouseposition);
 
 	const glm::vec2& getPosition() const { return m_position; }
 	float getLength() const { return m_length; }

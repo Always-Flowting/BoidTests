@@ -30,68 +30,32 @@ Display::Display(int width, int height, GLFWkeyfun keycallback, GLFWmousebuttonf
 		glfwTerminate();
 		throw std::runtime_error{ "Failed to initialize GLAD" };
 	}
+
+	m_flock = std::unique_ptr<Flock>{ new Flock{m_width, m_height} };
 }
 
 Display::~Display()
 {
-	glDeleteVertexArrays(1, &m_VAO);
-	glDeleteBuffers(1, &m_VBO);
 	glfwTerminate();
 }
 
 void Display::init()
 {
-	m_flock = std::unique_ptr<Flock>{ new Flock{m_width, m_height} };
 
-	ResourceManager::loadShader("boid.vert", "boid.frag", "wireBoid.geom", m_flockShader);
-
-	glGenBuffers(1, &m_VBO);
-
-	glGenVertexArrays(1, &m_VAO);
-	glBindVertexArray(m_VAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	glBufferData(GL_ARRAY_BUFFER, m_flock->getByteSize(), m_flock->getData(), GL_DYNAMIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(2 * sizeof(float)));
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(4 * sizeof(float)));
-
-	glBindVertexArray(0);
-	glBindBuffer(GL_VERTEX_ARRAY, 0);
-
-	float aspect{ m_width / static_cast<float>(m_height) };
-	glm::mat4 projection = glm::ortho(-aspect, aspect, -1.0f, 1.0f);
-
-	ResourceManager::getShader(m_flockShader).setMat4("proj", projection);
 }
 
 void Display::addFlockGroup(int amount, Boid::Type type, const glm::vec3& colour, const Boid::BoidVariables& variables)
 {
 	m_flock->addGroup(amount, type, colour, variables);
-	m_flock->resizeData();
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	glBufferData(GL_ARRAY_BUFFER, m_flock->getByteSize(), m_flock->getData(), GL_DYNAMIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	
 }
 
 void Display::updateObjects()
 {
 	if (m_flockState == objectState::normal)
 	{
-		if (m_flock->run())
-		{
-			ResourceManager::getShader(m_flockShader).activate();
-			glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-			glBufferSubData(GL_ARRAY_BUFFER, 0, m_flock->getByteSize(), m_flock->getData());
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
-		}
+		m_flock->run();
 	}
 }
 
@@ -105,11 +69,7 @@ void Display::draw()
 {
 	if (m_flockState >= objectState::frozen)
 	{
-		glLineWidth(2.0f);
-		ResourceManager::getShader(m_flockShader).activate();
-		glBindVertexArray(m_VAO);
-		glDrawArrays(GL_POINTS, 0, m_flock->getAmount());
-		glBindVertexArray(0);
+		m_flock->render();
 	}
 }
 
@@ -155,4 +115,13 @@ void Display::processKeyInput(int key, int scancode, int action, int mode)
 
 void Display::processMouseInput(int button, int action, int modifier)
 {
+	std::cout << action << '\n';
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+	{
+		// set variable to true
+	}
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+	{
+		// set variable to false
+	}
 }

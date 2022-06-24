@@ -1,9 +1,13 @@
 #ifndef FLOCK_CLASS_H
 #define FLOCK_CLASS_H
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
 #include <vector>
 #include <chrono>
 #include <numeric>
+#include <string>
 
 #include "Boid.h"
 #include "ResourceManager.h"
@@ -29,6 +33,10 @@ private:
 
 	float* m_data{ nullptr };
 
+	std::string m_shaderName{ "flock" };
+	GLuint m_VAO;
+	GLuint m_VBO;
+
 
 	void updateData();
 
@@ -48,17 +56,18 @@ private:
 
 	void border(Boid& boid);
 
+	void resizeData();
+
 public:
 	Flock(int width, int height);
 	~Flock();
 
 	void addGroup(int amount, Boid::Type type, const glm::vec3& colour, const Boid::BoidVariables& variables);
-	void resizeData();
 	bool run();
+	void render();
 
 	std::size_t getByteSize() const { return dataSize * getAmount() * sizeof(float); }
 	int getAmount() const { return std::accumulate(m_groupSize.begin(), m_groupSize.end(), 0); }
-	float* getData() { return m_data; }
 };
 
 #endif
