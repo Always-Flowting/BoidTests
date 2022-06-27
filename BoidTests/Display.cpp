@@ -32,16 +32,12 @@ Display::Display(int width, int height, GLFWkeyfun keycallback, GLFWmousebuttonf
 	}
 
 	m_flock = std::unique_ptr<Flock>{ new Flock{m_width, m_height} };
+	m_menu = std::unique_ptr<Menu>{ new Menu{m_width, m_height} };
 }
 
 Display::~Display()
 {
 	glfwTerminate();
-}
-
-void Display::init()
-{
-
 }
 
 void Display::addFlockGroup(int amount, Boid::Type type, const glm::vec3& colour, const Boid::BoidVariables& variables)
@@ -57,6 +53,13 @@ void Display::updateObjects()
 	{
 		m_flock->run();
 	}
+	if (m_menu->sliderActive())
+	{
+		double xPos, yPos;
+		glfwGetCursorPos(m_window, &xPos, &yPos);
+		glm::vec2 pos{ static_cast<float>(xPos), static_cast<float>(m_height - yPos) };
+		m_menu->MoveActiveSlider(pos.x);
+	}
 }
 
 void Display::clear(GLfloat r, GLfloat g, GLfloat b, GLfloat a)
@@ -70,6 +73,10 @@ void Display::draw()
 	if (m_flockState >= objectState::frozen)
 	{
 		m_flock->render();
+	}
+	if (m_showMenu)
+	{
+		m_menu->render();
 	}
 }
 
@@ -111,17 +118,24 @@ void Display::processKeyInput(int key, int scancode, int action, int mode)
 			m_flockState = objectState::frozen;
 		}
 	}
+
+	if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+	{
+		m_showMenu = !m_showMenu;
+	}
 }
 
 void Display::processMouseInput(int button, int action, int modifier)
 {
-	std::cout << action << '\n';
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && m_showMenu)
 	{
-		// set variable to true
+		double xPos, yPos;
+		glfwGetCursorPos(m_window, &xPos, &yPos);
+		glm::vec2 pos{ static_cast<float>(xPos), static_cast<float>(m_height - yPos) };
+		m_menu->setActiveSlider(pos);
 	}
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
 	{
-		// set variable to false
+		m_menu->resetActiveSlider();
 	}
 }

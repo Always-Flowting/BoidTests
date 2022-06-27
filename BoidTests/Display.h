@@ -12,7 +12,7 @@
 
 #include "ResourceManager.h"
 #include "Flock.h"
-#include "Slider.h"
+#include "Menu.h"
 
 class Display
 {
@@ -36,8 +36,9 @@ private:
 
 	std::unique_ptr<Flock> m_flock{ nullptr };
 
-	Slider m_slider{ glm::vec2{600.0f, 337.5f}, 1000.0f, 500.0f };
-
+	
+	std::unique_ptr<Menu> m_menu{ nullptr };
+	bool m_showMenu{ true };
 
 
 
@@ -48,7 +49,6 @@ public:
 	Display(int width, int height, GLFWkeyfun keycallback = nullptr, GLFWmousebuttonfun mousecallback = nullptr);
 	~Display();
 
-	void init();
 	void addFlockGroup(int amount, Boid::Type type, const glm::vec3& colour, const Boid::BoidVariables& variables);
 
 	void clear(GLfloat r, GLfloat g, GLfloat b, GLfloat a);

@@ -69,6 +69,7 @@ public:
 	static void setGroupType(int group, Type type) { s_groupType[group] = type; }
 	static void setGroupColour(int group, const glm::vec3& colour) { s_groupColour[group] = colour; }
 	static void setGroupVariables(int group, const BoidVariables& variables) { s_groupVariables[group] = variables; }
+	static BoidVariables& getSGroupVariables(int group) { return s_groupVariables[group]; }
 
 	const glm::vec3& getGroupColour() const { return s_groupColour[m_group]; }
 	Type getGroupType() const { return s_groupType[m_group]; }

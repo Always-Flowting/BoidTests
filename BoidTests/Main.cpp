@@ -23,8 +23,6 @@ int main()
 		return -1;
 	}
 
-	pDisplay->init();
-
 	pDisplay->addFlockGroup(250, Boid::Type::prey, glm::vec3(0.02f, 0.87f, 0.34f), 
 		Boid::BoidVariables{ 0.06f, 4.0f, 25.0f, 90.0f, 3.0f, 1.2f, 1.0f, 0.667f });
 

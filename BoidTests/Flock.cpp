@@ -194,10 +194,10 @@ void Flock::updateData()
 {
 	for (int i{ 0 }; i < getAmount(); ++i)
 	{
-		m_data[(dataSize * i)]		= (2.0f * m_aspect * m_flock[i].getPosition().x / m_width) - m_aspect;
-		m_data[(dataSize * i) + 1]	= (2.0f * m_flock[i].getPosition().y / m_height) - 1.0f;
+		m_data[(dataSize * i)]		= (m_aspect * m_flock[i].getPosition().x / m_width);
+		m_data[(dataSize * i) + 1]	= (m_flock[i].getPosition().y / m_height);
 		m_data[(dataSize * i) + 2]	= m_flock[i].getAngle();
-		m_data[(dataSize * i) + 3]	= (2.0f * m_flock[i].getGroupVariables().size / m_height);
+		m_data[(dataSize * i) + 3]	= (m_flock[i].getGroupVariables().size / m_height);
 		m_data[(dataSize * i) + 4]	= m_flock[i].getGroupColour().r;
 		m_data[(dataSize * i) + 5]	= m_flock[i].getGroupColour().g;
 		m_data[(dataSize * i) + 6]	= m_flock[i].getGroupColour().b;
@@ -222,7 +222,7 @@ Flock::Flock(int width, int height)
 
 	m_aspect = m_width / static_cast<float>(m_height);
 
-	glm::mat4 projection = glm::ortho(-m_aspect, m_aspect, -1.0f, 1.0f);
+	glm::mat4 projection = glm::ortho(0.0f, m_aspect, 0.0f, 1.0f);
 
 	ResourceManager::getShader(m_shaderName).setMat4("proj", projection);
 
@@ -253,7 +253,7 @@ Flock::Flock(int width, int height)
 Flock::~Flock()
 {
 	glDeleteVertexArrays(1, &m_VAO);
-	glDeleteBuffers(GL_VERTEX_ARRAY, &m_VBO);
+	glDeleteBuffers(1, &m_VBO);
 	delete[] m_data;
 }
 
