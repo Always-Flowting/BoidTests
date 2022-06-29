@@ -37,7 +37,9 @@ void main()
 	float slidePos = (gs_in[0].slider * gs_in[0].length) - halfL;
 	float slideSize = gs_in[0].height * 1.5;
 
-	gColour = vec3(0.75, 0.75, 0.78);
+	
+
+	gColour = vec3(0.75, 0.0, 0.0);
 	gl_Position = proj * (gl_in[0].gl_Position + vec4(slidePos - slideSize, -slideSize, 0.0, 0.0));
 	EmitVertex();
 	gl_Position = proj * (gl_in[0].gl_Position + vec4(slidePos + slideSize, -slideSize, 0.0, 0.0));

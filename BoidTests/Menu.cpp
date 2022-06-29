@@ -14,15 +14,14 @@ Menu::Menu(int width, int height)
 
 	ResourceManager::getShader(m_shaderName).setMat4("proj", projection);
 
-	glGenBuffers(1, &m_VBO);
 
 	glGenVertexArrays(1, &m_VAO);
-	glBindVertexArray(m_VAO);
+	glGenBuffers(1, &m_VBO);
 
+	glBindVertexArray(m_VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	m_sliders.push_back(std::array<Slider, static_cast<int>(sliderType::max_types)>{ Slider{ glm::vec2{600.0f, 337.5f}, 250.0f, 7.5f }, Slider{ glm::vec2{600.0f, 287.5f}, 250.0f, 7.5f }, Slider{ glm::vec2{600.0f, 237.5f}, 250.0f, 7.5f }, Slider{ glm::vec2{600.0f, 187.5f}, 250.0f, 7.5f } });
-	m_sliders.push_back(std::array<Slider, static_cast<int>(sliderType::max_types)>{ Slider{ glm::vec2{900.0f, 337.5f}, 250.0f, 7.5f }, Slider{ glm::vec2{900.0f, 287.5f}, 250.0f, 7.5f }, Slider{ glm::vec2{900.0f, 237.5f}, 250.0f, 7.5f }, Slider{ glm::vec2{900.0f, 187.5f}, 250.0f, 7.5f } });
-	glBufferData(GL_ARRAY_BUFFER, getByteSize(), nullptr, GL_DYNAMIC_DRAW);
+
+	glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_DYNAMIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, m_graphicDataSize, (void*)0);
@@ -31,16 +30,21 @@ Menu::Menu(int width, int height)
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, m_graphicDataSize, (void*)12);
 	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(float), (void*)(getAmount() * m_graphicDataSize));
+	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(float), (void*)static_cast<std::size_t>(getAmount() * m_graphicDataSize));
 
 
 	glBindVertexArray(0);
 	glBindBuffer(GL_VERTEX_ARRAY, 0);
 
-	m_graphicData = new float[4 * getAmount()];
+	addSliderGroup(glm::vec2{ 200.0f, 200.0f }, 250.0f, 7.5f, 25.0f);
+	addSliderGroup(glm::vec2{ 900.0f, 200.0f }, 250.0f, 7.5f, 25.0f);
+	//addSliderGroup(glm::vec2{ 0.0f, 0.0f }, 100.0f, 20.0f, -55.0f);
+	//addSliderGroup(glm::vec2{ 0.0f, 0.0f }, 0.0f, 0.0f, 0.0f);
+	
+	resizeData();
 	updateGraphicData();
-	m_sliderData = new float[getAmount()];
 	updateSliderData();
+	
 }
 
 Menu::~Menu()
@@ -57,6 +61,29 @@ void Menu::render()
 	glBindVertexArray(m_VAO);
 	glDrawArrays(GL_POINTS, 0, getAmount());
 	glBindVertexArray(0);
+}
+
+void Menu::addSliderGroup(glm::vec2 position, float length, float height, float seperation)
+{
+	m_sliders.push_back(std::array<Slider, static_cast<int>(sliderType::max_types)>{ Slider{ glm::vec2{position.x, position.y}, length, height }, Slider{ glm::vec2{position.x, position.y - seperation}, length, height }, Slider{ glm::vec2{position.x, position.y - 2 * seperation}, length, height }, Slider{ glm::vec2{position.x, position.y - 3 * seperation}, length, height } });
+	
+	
+
+	glBindVertexArray(m_VAO);
+	glBufferData(GL_ARRAY_BUFFER, getByteSize(), nullptr, GL_DYNAMIC_DRAW);
+	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(float), (void*)(static_cast<std::size_t>(getAmount() * m_graphicDataSize)));
+	glBindVertexArray(0);
+
+	
+	
+}
+
+void Menu::resizeData()
+{
+	delete[] m_graphicData;
+	m_graphicData = new float[getAmount() * m_graphicDataSize];
+	delete[] m_sliderData;
+	m_sliderData = new float[getAmount()];
 }
 
 void Menu::MoveActiveSlider(float mouseX)
@@ -99,9 +126,9 @@ void Menu::updateGraphicData()
 		}
 	}
 	ResourceManager::getShader(m_shaderName).activate();
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+	glBindVertexArray(m_VAO);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, getAmount() * m_graphicDataSize, m_graphicData);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 }
 
 void Menu::updateSliderData()
@@ -116,7 +143,7 @@ void Menu::updateSliderData()
 	}
 	ResourceManager::getShader(m_shaderName).activate();
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	glBufferSubData(GL_ARRAY_BUFFER, getAmount() * m_graphicDataSize, 4 * getAmount(), m_sliderData);
+	glBufferSubData(GL_ARRAY_BUFFER, m_graphicDataSize * getAmount(), getAmount() * sizeof(float), m_sliderData);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 

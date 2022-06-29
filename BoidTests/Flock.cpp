@@ -284,6 +284,7 @@ void Flock::addGroup(int amount, Boid::Type type, const glm::vec3& colour, const
 
 void Flock::resizeData()
 {
+	delete[] m_data;
 	m_data = new float[dataSize * getAmount()];
 }
 

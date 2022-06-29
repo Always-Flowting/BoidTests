@@ -49,17 +49,21 @@ private:
 
 	void updateSliderVariables();
 
+	void resizeData();
+
 public:
 	Menu(int width, int height);
 	~Menu();
 	void render();
+
+	void addSliderGroup(glm::vec2 position, float length, float height, float seperation);
 
 	void MoveActiveSlider(float mouseX);
 	void setActiveSlider(glm::vec2 mousePos);
 
 	void resetActiveSlider() { m_currentActive = nullptr; }
 	std::size_t getByteSize() const { return m_dataSize * getAmount() * sizeof(float); }
-	int getAmount() const { return 4 * m_sliders.size(); }
+	int getAmount() const { return 4 * static_cast<int>(m_sliders.size()); }
 	bool sliderActive() { return m_currentActive; }
 };
 
