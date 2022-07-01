@@ -6,6 +6,9 @@
 #include <random>
 #include <chrono>
 #include <map>
+#include <array>
+
+#include "Slider.h"
 
 class Boid
 {
@@ -20,14 +23,25 @@ public:
 
 	struct BoidVariables
 	{
+		Type type{};
 		float maxAcceleration{};
 		float maxVelocity{};
-		float seperationDistance{};
-		float sightDistance{};
 		float size{};
-		float seperation{};
-		float alignment{};
-		float cohesion{};
+		float r{};
+		float g{};
+		float b{};
+	};
+
+	enum class SliderType
+	{
+		seperation,
+		alignment,
+		cohesion,
+		pursue_evade,
+		sight_distance,
+		seperation_distance,
+
+		max_types
 	};
 
 private:
@@ -35,9 +49,10 @@ private:
 	static std::mt19937 s_mt;
 	static std::uniform_real_distribution<float> s_rAngle;
 
-	static std::map<int, Type> s_groupType;
-	static std::map<int, glm::vec3> s_groupColour;
 	static std::map<int, BoidVariables> s_groupVariables;
+	static std::map<int, std::array<Slider, static_cast<int>(SliderType::max_types)>> s_groupSlider;
+
+	static int s_groupNumber;
 
 	// boid movement variables
 	glm::vec2 m_position;
@@ -49,6 +64,9 @@ private:
 public:
 	Boid();
 	Boid(const glm::vec2& position, int group);
+	Boid(const Boid& boid);
+
+	void operator=(const Boid& boid);
 
 	void update();
 
@@ -66,14 +84,15 @@ public:
 
 	int getGroup() const { return m_group; }
 
-	static void setGroupType(int group, Type type) { s_groupType[group] = type; }
-	static void setGroupColour(int group, const glm::vec3& colour) { s_groupColour[group] = colour; }
-	static void setGroupVariables(int group, const BoidVariables& variables) { s_groupVariables[group] = variables; }
-	static BoidVariables& getSGroupVariables(int group) { return s_groupVariables[group]; }
+	const BoidVariables& getVariables() const { return s_groupVariables[m_group]; }
+	float getPercentage(SliderType type) const { return s_groupSlider[m_group][static_cast<int>(type)].getPercentage(); }
 
-	const glm::vec3& getGroupColour() const { return s_groupColour[m_group]; }
-	Type getGroupType() const { return s_groupType[m_group]; }
-	const BoidVariables& getGroupVariables() const { return s_groupVariables[m_group]; }
+	static void setGroupVariables(int group, const BoidVariables& variables) { s_groupVariables[group] = std::move(variables); }
+	static void setGroupSliders(int group, std::array<Slider, static_cast<int>(SliderType::max_types)>& sliders) { s_groupSlider[group] = sliders; }
+	
+	static BoidVariables& getGroupVariables(int group) { return s_groupVariables[group]; }
+	static const std::array<Slider, static_cast<int>(SliderType::max_types)>& getGroupSliders(int group) { return s_groupSlider[group]; }
+
 };
 
 #endif

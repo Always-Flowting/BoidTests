@@ -4,8 +4,26 @@ Slider::Slider(const glm::vec2& position, float length, float height)
 	:m_position{ position },
 	m_length{ length },
 	m_height{ height },
-	m_sliderPosition{ length }
+	m_sliderPosition{ 0.0f }
 { }
+
+Slider::Slider(const Slider& slider)
+{
+	m_position = slider.m_position;
+	m_length = slider.m_length;
+	m_height = slider.m_height;
+	m_sliderPosition = slider.m_sliderPosition;
+	m_percentage = slider.m_percentage;
+}
+
+void Slider::operator=(const Slider& slider)
+{
+	m_position = slider.m_position;
+	m_length = slider.m_length;
+	m_height = slider.m_height;
+	m_sliderPosition = slider.m_sliderPosition;
+	m_percentage = slider.m_percentage;
+}
 
 void Slider::updatePosition(float newPos)
 {

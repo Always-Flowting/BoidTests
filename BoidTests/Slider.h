@@ -12,10 +12,13 @@ private:
 	float m_length;
 	float m_height;
 	float m_sliderPosition;
-	float m_percentage{ 1.0f };
+	float m_percentage{ 0.0f };
 
 public:
 	Slider(const glm::vec2& position, float length, float height);
+	Slider(const Slider& slider);
+
+	void operator=(const Slider& slider);
 
 	void updatePosition(float sliderPosition);
 

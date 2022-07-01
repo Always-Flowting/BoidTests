@@ -36,14 +36,14 @@ Menu::Menu(int width, int height)
 	glBindVertexArray(0);
 	glBindBuffer(GL_VERTEX_ARRAY, 0);
 
-	addSliderGroup(glm::vec2{ 200.0f, 200.0f }, 250.0f, 7.5f, 25.0f);
-	addSliderGroup(glm::vec2{ 900.0f, 200.0f }, 250.0f, 7.5f, 25.0f);
+	//updateGraphicData();
+	//updateSliderData();
+
 	//addSliderGroup(glm::vec2{ 0.0f, 0.0f }, 100.0f, 20.0f, -55.0f);
 	//addSliderGroup(glm::vec2{ 0.0f, 0.0f }, 0.0f, 0.0f, 0.0f);
 	
-	resizeData();
-	updateGraphicData();
-	updateSliderData();
+	//resizeData();
+	//updateSliderData();
 	
 }
 
@@ -73,6 +73,9 @@ void Menu::addSliderGroup(glm::vec2 position, float length, float height, float 
 	glBufferData(GL_ARRAY_BUFFER, getByteSize(), nullptr, GL_DYNAMIC_DRAW);
 	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(float), (void*)(static_cast<std::size_t>(getAmount() * m_graphicDataSize)));
 	glBindVertexArray(0);
+
+	resizeData();
+	updateGraphicData();
 
 	
 	
@@ -166,6 +169,7 @@ void Menu::updateSliderVariables()
 				Boid::getSGroupVariables(slideGroup).cohesion = m_sliders[slideGroup][slideVar].getPercentage();
 				break;
 			case Menu::sliderType::pursue_evade:
+				Boid::getSGroupVariables(slideGroup).pursue_evade = m_sliders[slideGroup][slideVar].getPercentage();
 				break;
 			default:
 				break;

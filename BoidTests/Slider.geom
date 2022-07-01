@@ -39,7 +39,7 @@ void main()
 
 	
 
-	gColour = vec3(0.75, 0.0, 0.0);
+	gColour = vec3(0.7, 0.7, 1.0);
 	gl_Position = proj * (gl_in[0].gl_Position + vec4(slidePos - slideSize, -slideSize, 0.0, 0.0));
 	EmitVertex();
 	gl_Position = proj * (gl_in[0].gl_Position + vec4(slidePos + slideSize, -slideSize, 0.0, 0.0));

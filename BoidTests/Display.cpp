@@ -40,11 +40,12 @@ Display::~Display()
 	glfwTerminate();
 }
 
-void Display::addFlockGroup(int amount, Boid::Type type, const glm::vec3& colour, const Boid::BoidVariables& variables)
+void Display::addFlockGroup(int amount, Boid::Type type, const glm::vec3& colour, const Boid::BoidVariables& variables, const glm::vec2& position)
 {
+	m_menu->addSliderGroup(position, 200.0f, 5.0f, 20.0f);
+
 	m_flock->addGroup(amount, type, colour, variables);
 
-	
 }
 
 void Display::updateObjects()

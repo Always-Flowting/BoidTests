@@ -62,7 +62,7 @@ public:
 	Flock(int width, int height);
 	~Flock();
 
-	void addGroup(int amount, Boid::Type type, const glm::vec3& colour, const Boid::BoidVariables& variables);
+	void addGroup(int amount, const Boid::BoidVariables& variables);
 	bool run();
 	void render();
 

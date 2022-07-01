@@ -49,7 +49,7 @@ public:
 	Display(int width, int height, GLFWkeyfun keycallback = nullptr, GLFWmousebuttonfun mousecallback = nullptr);
 	~Display();
 
-	void addFlockGroup(int amount, Boid::Type type, const glm::vec3& colour, const Boid::BoidVariables& variables);
+	void addFlockGroup(int amount, Boid::Type type, const glm::vec3& colour, const Boid::BoidVariables& variables, const glm::vec2& position);
 
 	void clear(GLfloat r, GLfloat g, GLfloat b, GLfloat a);
 	void draw();
