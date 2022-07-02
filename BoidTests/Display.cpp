@@ -30,9 +30,6 @@ Display::Display(int width, int height, GLFWkeyfun keycallback, GLFWmousebuttonf
 		glfwTerminate();
 		throw std::runtime_error{ "Failed to initialize GLAD" };
 	}
-
-	m_flock = std::unique_ptr<Flock>{ new Flock{m_width, m_height} };
-	m_menu = std::unique_ptr<Menu>{ new Menu{m_width, m_height} };
 }
 
 Display::~Display()
@@ -40,12 +37,15 @@ Display::~Display()
 	glfwTerminate();
 }
 
-void Display::addFlockGroup(int amount, Boid::Type type, const glm::vec3& colour, const Boid::BoidVariables& variables, const glm::vec2& position)
+void Display::init(int amount)
 {
-	m_menu->addSliderGroup(position, 200.0f, 5.0f, 20.0f);
+	m_flock = std::unique_ptr<Flock>{ new Flock{m_width, m_height} };
+	m_menu = std::unique_ptr<Menu>{ new Menu{m_width, m_height} };
 
-	m_flock->addGroup(amount, type, colour, variables);
-
+	m_flock->addBoids(amount);
+	Boid::setVariables(Boid::BoidVariables{ 0.05f, 4.0f, 4.0f, 1.0f, 1.0f, 1.0f });
+	Boid::setSliders(Boid::variableSliders_t{ Slider{glm::vec2{400.0f, 200.0f}, 200.0f, 20.0f} });
+	m_menu->updateAllData();
 }
 
 void Display::updateObjects()
@@ -137,6 +137,6 @@ void Display::processMouseInput(int button, int action, int modifier)
 	}
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
 	{
-		m_menu->resetActiveSlider();
+		m_menu->clearActiveSlider();
 	}
 }

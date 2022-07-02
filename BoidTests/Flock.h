@@ -22,7 +22,6 @@ private:
 	const int dataSize{ 7 };
 
 	std::vector<Boid> m_flock{};
-	std::vector<int> m_groupSize{};
 
 	int m_width{};
 	int m_height{};
@@ -45,11 +44,6 @@ private:
 
 	void fleePosition	(Boid& boid, float weight, const glm::vec2& targetPosition);
 
-	void pursueClosestType(Boid& boid, float weight, Boid::Type type);
-
-	void evadeClosestType(Boid& boid, float weight, Boid::Type type);
-
-
 	void seperate(Boid& boid);
 	void align(Boid& boid);
 	void cohesion(Boid& boid);
@@ -62,12 +56,12 @@ public:
 	Flock(int width, int height);
 	~Flock();
 
-	void addGroup(int amount, const Boid::BoidVariables& variables);
+	void addBoids(int amount);
 	bool run();
 	void render();
 
 	std::size_t getByteSize() const { return dataSize * getAmount() * sizeof(float); }
-	int getAmount() const { return std::accumulate(m_groupSize.begin(), m_groupSize.end(), 0); }
+	int getAmount() const { return static_cast<int>(m_flock.size()); }
 };
 
 #endif

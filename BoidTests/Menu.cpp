@@ -4,16 +4,12 @@ Menu::Menu(int width, int height)
 	:m_width{ width },
 	m_height{ height }
 {
+	m_aspect = m_width / static_cast<float>(m_height);
 
 	ResourceManager::loadShader("slider.vert", "slider.frag", "slider.geom", m_shaderName);
 
-	m_aspect = m_width / static_cast<float>(m_height);
-
-	//glm::mat4 projection = glm::ortho(-m_aspect, m_aspect, -1.0f, 1.0f);
 	glm::mat4 projection = glm::ortho(0.0f, m_aspect, 0.0f, 1.0f);
-
 	ResourceManager::getShader(m_shaderName).setMat4("proj", projection);
-
 
 	glGenVertexArrays(1, &m_VAO);
 	glGenBuffers(1, &m_VBO);
@@ -21,159 +17,113 @@ Menu::Menu(int width, int height)
 	glBindVertexArray(m_VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
 
-	glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_DYNAMIC_DRAW);
+	//float data[10]{ 0.5f, 0.5f, 0.5f, 0.4f, 0.25f, 0.25f, 0.02f, 0.02f, 0.2f, 0.01f };
+	//float data[10]{ 0.5f, 0.5f, 0.25f, 0.02f, 0.5f, 0.5f, 0.4f, 0.25f, 0.02f, 0.4f };
+	//float data[5]{ 0.5f, 0.5f, 0.25f, 0.02f, 0.5f };
+
+
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_DYNAMIC_DRAW);
+
+	m_data = new float[5 * static_cast<int>(Boid::SliderType::max_types)];
+
+	glBufferData(GL_ARRAY_BUFFER, static_cast<int>(Boid::SliderType::max_types) * 5 * sizeof(float), m_data, GL_DYNAMIC_DRAW);
+
+	updateAllData();
 
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, m_graphicDataSize, (void*)0);
+	glVertexAttribPointer(0, 1, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(0 * sizeof(float)));
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, m_graphicDataSize, (void*)8);
+	glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(1 * sizeof(float)));
 	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, m_graphicDataSize, (void*)12);
+	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(2 * sizeof(float)));
 	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(float), (void*)static_cast<std::size_t>(getAmount() * m_graphicDataSize));
+	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(4);
+	glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(4 * sizeof(float)));
 
 
 	glBindVertexArray(0);
 	glBindBuffer(GL_VERTEX_ARRAY, 0);
-
-	//updateGraphicData();
-	//updateSliderData();
-
-	//addSliderGroup(glm::vec2{ 0.0f, 0.0f }, 100.0f, 20.0f, -55.0f);
-	//addSliderGroup(glm::vec2{ 0.0f, 0.0f }, 0.0f, 0.0f, 0.0f);
-	
-	//resizeData();
-	//updateSliderData();
-	
 }
 
 Menu::~Menu()
 {
 	glDeleteVertexArrays(1, &m_VAO);
 	glDeleteBuffers(1, &m_VBO);
-	delete[] m_graphicData;
-	delete[] m_sliderData;
 }
 
 void Menu::render()
 {
 	ResourceManager::getShader(m_shaderName).activate();
 	glBindVertexArray(m_VAO);
-	glDrawArrays(GL_POINTS, 0, getAmount());
+	glDrawArrays(GL_POINTS, 0, static_cast<int>(Boid::SliderType::max_types));
 	glBindVertexArray(0);
-}
-
-void Menu::addSliderGroup(glm::vec2 position, float length, float height, float seperation)
-{
-	m_sliders.push_back(std::array<Slider, static_cast<int>(sliderType::max_types)>{ Slider{ glm::vec2{position.x, position.y}, length, height }, Slider{ glm::vec2{position.x, position.y - seperation}, length, height }, Slider{ glm::vec2{position.x, position.y - 2 * seperation}, length, height }, Slider{ glm::vec2{position.x, position.y - 3 * seperation}, length, height } });
-	
-	
-
-	glBindVertexArray(m_VAO);
-	glBufferData(GL_ARRAY_BUFFER, getByteSize(), nullptr, GL_DYNAMIC_DRAW);
-	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(float), (void*)(static_cast<std::size_t>(getAmount() * m_graphicDataSize)));
-	glBindVertexArray(0);
-
-	resizeData();
-	updateGraphicData();
-
-	
-	
-}
-
-void Menu::resizeData()
-{
-	delete[] m_graphicData;
-	m_graphicData = new float[getAmount() * m_graphicDataSize];
-	delete[] m_sliderData;
-	m_sliderData = new float[getAmount()];
 }
 
 void Menu::MoveActiveSlider(float mouseX)
 {
-	if (m_currentActive)
+	if (m_activeSlider)
 	{
-		m_currentActive->updatePosition(mouseX);
-		updateSliderVariables();
-		updateSliderData();
+		m_activeSlider->updatePosition(mouseX);
 	}
+	updateAllData();
 }
 
 void Menu::setActiveSlider(glm::vec2 mousePos)
 {
-	for (auto& group : m_sliders)
+	for (Slider& slider : Boid::getSliders())
 	{
-		for (auto& slider : group)
+		if (slider.mouseOver(mousePos))
 		{
-			if (slider.mouseOver(mousePos))
-			{
-				m_currentActive = &slider;
-				return;
-			}
+			m_activeSlider = &slider;
+			return;
 		}
 	}
-	m_currentActive = nullptr;
+	m_activeSlider = nullptr;
 }
 
-void Menu::updateGraphicData()
+void Menu::updateAllData()
 {
+	//int offset{ static_cast<int>(Boid::SliderType::max_types) };
 	int count{ 0 };
-	for (auto& group : m_sliders)
+
+	for (const Slider& slider : Boid::getCSliders())
 	{
-		for (auto& slider : group)
-		{
-			m_graphicData[count++] = (m_aspect * slider.getPosition().x / m_width);
-			m_graphicData[count++] = (slider.getPosition().y / m_height);
-			m_graphicData[count++] = slider.getLength() / m_height;
-			m_graphicData[count++] = slider.getHeight() / m_height;
-		}
+		m_data[count++] = m_aspect * slider.getPosition().x / m_width;
+		std::cout << m_data[count - 1] << '\n';
+
+		m_data[count++] = slider.getPosition().y / m_height;
+		std::cout << m_data[count - 1] << '\n';
+
+		m_data[count++] = slider.getLength() / m_height;
+		std::cout << m_data[count - 1] << '\n';
+
+		m_data[count++] = slider.getHeight() / m_height;
+		std::cout << m_data[count - 1] << '\n';
+
+		m_data[count++] = slider.getPercentage();
+		std::cout << m_data[count - 1] << '\n' << '\n';
 	}
+
+
+
 	ResourceManager::getShader(m_shaderName).activate();
-	glBindVertexArray(m_VAO);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, getAmount() * m_graphicDataSize, m_graphicData);
-	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+	//glBufferSubData(GL_ARRAY_BUFFER, 0, 5 * static_cast<int>(Boid::SliderType::max_types) * sizeof(float), m_data);
+	glBufferData(GL_ARRAY_BUFFER, static_cast<int>(Boid::SliderType::max_types) * 5 * sizeof(float), m_data, GL_DYNAMIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void Menu::updateSliderData()
 {
 	int count{ 0 };
-	for (auto& group : m_sliders)
+	float data[static_cast<int>(Boid::SliderType::max_types)];
+	for (const Slider& slider : Boid::getCSliders())
 	{
-		for (auto& slider : group)
-		{
-			m_sliderData[count++] = slider.getPercentage();
-		}
+		data[count++] = slider.getPercentage();
 	}
 	ResourceManager::getShader(m_shaderName).activate();
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	glBufferSubData(GL_ARRAY_BUFFER, m_graphicDataSize * getAmount(), getAmount() * sizeof(float), m_sliderData);
+	glBufferSubData(GL_ARRAY_BUFFER, static_cast<int>(Boid::SliderType::max_types) * 4 * sizeof(float), static_cast<int>(Boid::SliderType::max_types) * sizeof(float), data);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
-
-void Menu::updateSliderVariables()
-{
-	for (int slideGroup{ 0 }; slideGroup < static_cast<int>(m_sliders.size()); ++slideGroup)
-	{
-		for (int slideVar{ 0 }; slideVar < static_cast<int>(sliderType::max_types); ++slideVar)
-		{
-			sliderType typ{ static_cast<sliderType>(slideVar) };
-			switch (typ)
-			{
-			case Menu::sliderType::seperation:
-				Boid::getSGroupVariables(slideGroup).seperation = m_sliders[slideGroup][slideVar].getPercentage();
-				break;
-			case Menu::sliderType::alignment:
-				Boid::getSGroupVariables(slideGroup).alignment = m_sliders[slideGroup][slideVar].getPercentage();
-				break;
-			case Menu::sliderType::cohesion:
-				Boid::getSGroupVariables(slideGroup).cohesion = m_sliders[slideGroup][slideVar].getPercentage();
-				break;
-			case Menu::sliderType::pursue_evade:
-				Boid::getSGroupVariables(slideGroup).pursue_evade = m_sliders[slideGroup][slideVar].getPercentage();
-				break;
-			default:
-				break;
-			}
-		}
-	}
 }

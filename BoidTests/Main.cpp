@@ -23,14 +23,7 @@ int main()
 		return -1;
 	}
 
-	pDisplay->addFlockGroup(250, Boid::Type::prey, glm::vec3(0.02f, 0.87f, 0.34f), 
-		Boid::BoidVariables{ 0.06f, 4.0f, 25.0f, 90.0f, 3.0f, 1.2f, 1.0f, 0.667f, 0.0f }, glm::vec2{150.0f, 200.0f});
-
-	//display->addFlockGroup(75, Boid::Type::prey, glm::vec3(0.7f, 0.87f, 0.16f),
-	//	Boid::BoidVariables{ 0.03f, 2.0f, 15.0f, 100.0f, 2.0f, 10.6f, 04.3f, 10.5f });
-
-	pDisplay->addFlockGroup(10, Boid::Type::predator, glm::vec3(1.0f, 0.15f, 0.02f), 
-		Boid::BoidVariables{ 0.06f, 2.0f, 55.0f, 120.0f, 4.5f, 1.5f, 0.667f, 0.667f, 0.0f }, glm::vec2{ 105.0f, 200.0f });
+	pDisplay->init(50);
 
 	while (!pDisplay->shouldClose())
 	{

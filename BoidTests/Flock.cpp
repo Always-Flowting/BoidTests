@@ -19,31 +19,6 @@ void Flock::seekPosition(Boid& boid, float weight, const glm::vec2& targetPositi
 	boid.addAcceleration(weight * steering);
 }
 
-void Flock::pursueClosestType(Boid& boid, float weight, Boid::Type type)
-{
-	glm::vec2 fPrediction{ 0.0f };
-	bool found{ false };
-
-	for (auto& other : m_flock)
-	{
-		if (boid.getVariables().type == type)
-		{
-			float dist{ glm::distance(boid.getPosition(), other.getPosition()) };
-			if (dist < boid.getPercentage(Boid::SliderType::sight_distance) && dist > 0.0f && (dist < glm::length(fPrediction) || !found))
-			{
-				fPrediction = other.getPosition() + other.getVelocity() * dist * other.getVariables().maxAcceleration;
-				found = true;
-			}
-		}
-
-	}
-
-	if (found)
-	{
-		seekPosition(boid, weight, fPrediction);
-	}
-}
-
 /*
 / All fleeing based functions
 */
@@ -59,31 +34,6 @@ void Flock::fleePosition(Boid& boid, float weight, const glm::vec2& targetPositi
 	boid.addAcceleration(weight * steering);
 }
 
-void Flock::evadeClosestType(Boid& boid, float weight, Boid::Type type)
-{
-	glm::vec2 fPrediction{ 0.0f };
-	bool found{ false };
-
-	for (auto& other : m_flock)
-	{
-		if (other.getVariables().type == type)
-		{
-			float dist{ glm::distance(boid.getPosition(), other.getPosition()) };
-			if (dist < boid.getPercentage(Boid::SliderType::sight_distance) && dist > 0.0f && (dist < glm::length(fPrediction) || !found))
-			{
-				fPrediction = other.getPosition() + other.getVelocity() * dist * other.getVariables().maxAcceleration;
-				found = true;
-			}
-		}
-
-	}
-
-	if (found)
-	{
-		fleePosition(boid, weight, fPrediction);
-	}
-}
-
 /*
 / flocking behaviour implimentation
 */
@@ -96,14 +46,11 @@ void Flock::seperate(Boid& boid)
 
 	for (auto& other : m_flock)
 	{
-		if (boid.getGroup() == other.getGroup())
+		float dist{ glm::distance(boid.getPosition(), other.getPosition()) };
+		if (dist > 0.0f && dist <= Boid::getCSliders()[static_cast<int>(Boid::SliderType::seperation_distance)].getPercentage())
 		{
-			float dist{ glm::distance(boid.getPosition(), other.getPosition()) };
-			if (dist > 0.0f && dist <= boid.getPercentage(Boid::SliderType::seperation_distance))
-			{
-				steering += glm::normalize(boid.getPosition() - other.getPosition()) / dist;
-				found = true;
-			}
+			steering += glm::normalize(boid.getPosition() - other.getPosition()) / dist;
+			found = true;
 		}
 	}
 
@@ -112,7 +59,7 @@ void Flock::seperate(Boid& boid)
 		steering = glm::normalize(steering) * boid.getVariables().maxVelocity;
 		steering -= boid.getVelocity();
 
-		boid.addAcceleration(boid.getPercentage(Boid::SliderType::seperation) * steering);
+		boid.addAcceleration(Boid::getCSliders()[static_cast<int>(Boid::SliderType::seperation)].getPercentage() * steering);
 	}
 }
 
@@ -123,14 +70,11 @@ void Flock::align(Boid& boid)
 
 	for (auto& other : m_flock)
 	{
-		if (boid.getGroup() == other.getGroup())
+		float dist{ glm::distance(boid.getPosition(), other.getPosition()) };
+		if (dist > 0.0f && dist <= Boid::getCSliders()[static_cast<int>(Boid::SliderType::sight_distance)].getPercentage())
 		{
-			float dist{ glm::distance(boid.getPosition(), other.getPosition()) };
-			if (dist > 0.0f && dist <= boid.getPercentage(Boid::SliderType::sight_distance))
-			{
-				direction += other.getVelocity();
-				found = true;
-			}
+			direction += other.getVelocity();
+			found = true;
 		}
 	}
 
@@ -139,7 +83,7 @@ void Flock::align(Boid& boid)
 		direction = glm::normalize(direction) * boid.getVariables().maxVelocity;
 		direction -= boid.getVelocity();
 
-		boid.addAcceleration(boid.getPercentage(Boid::SliderType::alignment) * direction);
+		boid.addAcceleration(Boid::getCSliders()[static_cast<int>(Boid::SliderType::alignment)].getPercentage() * direction);
 	}
 }
 
@@ -150,21 +94,18 @@ void Flock::cohesion(Boid& boid)
 
 	for (auto& other : m_flock)
 	{
-		if (boid.getGroup() == other.getGroup())
+		float dist{ glm::distance(boid.getPosition(), other.getPosition()) };
+		if (dist > 0.0f && dist <= Boid::getCSliders()[static_cast<int>(Boid::SliderType::sight_distance)].getPercentage())
 		{
-			float dist{ glm::distance(boid.getPosition(), other.getPosition()) };
-			if (dist > 0.0f && dist <= boid.getPercentage(Boid::SliderType::sight_distance))
-			{
-				target += other.getPosition();
-				++count;
-			}
+			target += other.getPosition();
+			++count;
 		}
 	}
 
 	if (count > 0)
 	{
 		target /= static_cast<float>(count);
-		seekPosition(boid, boid.getPercentage(Boid::SliderType::cohesion), target);
+		seekPosition(boid, Boid::getCSliders()[static_cast<int>(Boid::SliderType::cohesion)].getPercentage(), target);
 	}
 }
 
@@ -235,7 +176,7 @@ Flock::Flock(int width, int height)
 	glBindVertexArray(m_VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	glBufferData(GL_ARRAY_BUFFER, getByteSize(), m_data, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_DYNAMIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0);
@@ -257,16 +198,12 @@ Flock::~Flock()
 	delete[] m_data;
 }
 
-void Flock::addGroup(int amount, const Boid::BoidVariables& variables)
+void Flock::addBoids(int amount)
 {
-	static int group{ 0 };
-	Boid::setGroupVariables(group, variables);
-
-	m_groupSize.push_back(amount);
 	//glm::vec2 center{ m_width / 2.0f, m_height / 2.0f };
 	for (int boids{ 0 }; boids < amount; ++boids)
 	{
-		m_flock.push_back(std::move(Boid(glm::vec2{s_rX(s_mt), s_rY(s_mt)}, group)));
+		m_flock.push_back(Boid(glm::vec2{ s_rX(s_mt), s_rY(s_mt) }));
 	}
 
 	resizeData();
@@ -275,8 +212,6 @@ void Flock::addGroup(int amount, const Boid::BoidVariables& variables)
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
 	glBufferData(GL_ARRAY_BUFFER, getByteSize(), m_data, GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	++group;
 }
 
 void Flock::resizeData()
@@ -295,15 +230,6 @@ bool Flock::run()
 			seperate(boid);
 			align(boid);
 			cohesion(boid);
-
-			if (boid.getVariables().type == Boid::Type::prey)
-			{
-				evadeClosestType(boid, boid.getPercentage(Boid::SliderType::pursue_evade), Boid::Type::predator);
-			}
-			else if (boid.getVariables().type == Boid::Type::predator)
-			{
-				pursueClosestType(boid, boid.getPercentage(Boid::SliderType::pursue_evade), Boid::Type::prey);
-			}
 
 			border(boid);
 		}
