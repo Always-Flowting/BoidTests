@@ -3,10 +3,11 @@
 Slider::Slider()
 { }
 
-Slider::Slider(const glm::vec2& position, float length, float height)
+Slider::Slider(const glm::vec2& position, float length, float height, float mult)
 	:m_position{ position },
 	m_length{ length },
-	m_height{ height }
+	m_height{ height },
+	m_mult{ mult }
 { }
 
 Slider::Slider(const Slider& slider)
@@ -16,6 +17,7 @@ Slider::Slider(const Slider& slider)
 	m_height = slider.m_height;
 	m_sliderPosition = slider.m_sliderPosition;
 	m_percentage = slider.m_percentage;
+	m_mult = slider.m_mult;
 }
 
 void Slider::operator=(const Slider& slider)
@@ -25,6 +27,7 @@ void Slider::operator=(const Slider& slider)
 	m_height = slider.m_height;
 	m_sliderPosition = slider.m_sliderPosition;
 	m_percentage = slider.m_percentage;
+	m_mult = slider.m_mult;
 }
 
 void Slider::updatePosition(float cursorX)

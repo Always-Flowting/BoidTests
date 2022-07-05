@@ -47,7 +47,7 @@ void Flock::seperate(Boid& boid)
 	for (auto& other : m_flock)
 	{
 		float dist{ glm::distance(boid.getPosition(), other.getPosition()) };
-		if (dist > 0.0f && dist <= Boid::getCSliders()[static_cast<int>(Boid::SliderType::seperation_distance)].getPercentage())
+		if (dist > 0.0f && dist <= Boid::getCSliders()[static_cast<int>(Boid::SliderType::seperation_distance)].getMultiplied())
 		{
 			steering += glm::normalize(boid.getPosition() - other.getPosition()) / dist;
 			found = true;
@@ -59,7 +59,7 @@ void Flock::seperate(Boid& boid)
 		steering = glm::normalize(steering) * boid.getVariables().maxVelocity;
 		steering -= boid.getVelocity();
 
-		boid.addAcceleration(Boid::getCSliders()[static_cast<int>(Boid::SliderType::seperation)].getPercentage() * steering);
+		boid.addAcceleration(Boid::getCSliders()[static_cast<int>(Boid::SliderType::seperation)].getMultiplied() * steering);
 	}
 }
 
@@ -71,7 +71,7 @@ void Flock::align(Boid& boid)
 	for (auto& other : m_flock)
 	{
 		float dist{ glm::distance(boid.getPosition(), other.getPosition()) };
-		if (dist > 0.0f && dist <= Boid::getCSliders()[static_cast<int>(Boid::SliderType::sight_distance)].getPercentage())
+		if (dist > 0.0f && dist <= Boid::getCSliders()[static_cast<int>(Boid::SliderType::sight_distance)].getMultiplied())
 		{
 			direction += other.getVelocity();
 			found = true;
@@ -83,7 +83,7 @@ void Flock::align(Boid& boid)
 		direction = glm::normalize(direction) * boid.getVariables().maxVelocity;
 		direction -= boid.getVelocity();
 
-		boid.addAcceleration(Boid::getCSliders()[static_cast<int>(Boid::SliderType::alignment)].getPercentage() * direction);
+		boid.addAcceleration(Boid::getCSliders()[static_cast<int>(Boid::SliderType::alignment)].getMultiplied() * direction);
 	}
 }
 
@@ -95,7 +95,7 @@ void Flock::cohesion(Boid& boid)
 	for (auto& other : m_flock)
 	{
 		float dist{ glm::distance(boid.getPosition(), other.getPosition()) };
-		if (dist > 0.0f && dist <= Boid::getCSliders()[static_cast<int>(Boid::SliderType::sight_distance)].getPercentage())
+		if (dist > 0.0f && dist <= Boid::getCSliders()[static_cast<int>(Boid::SliderType::sight_distance)].getMultiplied())
 		{
 			target += other.getPosition();
 			++count;
@@ -105,7 +105,7 @@ void Flock::cohesion(Boid& boid)
 	if (count > 0)
 	{
 		target /= static_cast<float>(count);
-		seekPosition(boid, Boid::getCSliders()[static_cast<int>(Boid::SliderType::cohesion)].getPercentage(), target);
+		seekPosition(boid, Boid::getCSliders()[static_cast<int>(Boid::SliderType::cohesion)].getMultiplied(), target);
 	}
 }
 
@@ -200,7 +200,6 @@ Flock::~Flock()
 
 void Flock::addBoids(int amount)
 {
-	//glm::vec2 center{ m_width / 2.0f, m_height / 2.0f };
 	for (int boids{ 0 }; boids < amount; ++boids)
 	{
 		m_flock.push_back(Boid(glm::vec2{ s_rX(s_mt), s_rY(s_mt) }));

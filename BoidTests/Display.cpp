@@ -42,9 +42,17 @@ void Display::init(int amount)
 	m_flock = std::unique_ptr<Flock>{ new Flock{m_width, m_height} };
 	m_menu = std::unique_ptr<Menu>{ new Menu{m_width, m_height} };
 
+	Boid::setSliders(Boid::variableSliders_t{
+		Slider{glm::vec2{400.0f, 200.0f}, 200.0f, 7.5f, 1.0f},
+		Slider{glm::vec2{400.0f, 170.0f}, 200.0f, 7.5f, 1.0f},
+		Slider{glm::vec2{400.0f, 140.0f}, 200.0f, 7.5f, 1.0f},
+		Slider{glm::vec2{400.0f, 110.0f}, 200.0f, 7.5f, 200.0f},
+		Slider{glm::vec2{400.0f, 80.0f}, 200.0f, 7.5f, 200.0f},
+
+		});
+
 	m_flock->addBoids(amount);
 	Boid::setVariables(Boid::BoidVariables{ 0.05f, 4.0f, 4.0f, 1.0f, 1.0f, 1.0f });
-	Boid::setSliders(Boid::variableSliders_t{ Slider{glm::vec2{400.0f, 200.0f}, 200.0f, 20.0f} });
 	m_menu->updateAllData();
 }
 
@@ -123,6 +131,7 @@ void Display::processKeyInput(int key, int scancode, int action, int mode)
 	if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
 	{
 		m_showMenu = !m_showMenu;
+		m_menu->clearActiveSlider();
 	}
 }
 
